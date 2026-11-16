@@ -114,11 +114,54 @@
     });
   }
 
+  function splitTextIntoChars(element) {
+    if (!element) return [];
+    const chars = [];
+
+    const walk = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent;
+        const fragment = document.createDocumentFragment();
+        const parts = text.split(/(\s+)/);
+
+        parts.forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) {
+            fragment.appendChild(document.createTextNode(part));
+          } else {
+            const wordSpan = document.createElement('span');
+            wordSpan.className = 'split-word';
+
+            Array.from(part).forEach((char) => {
+              const charSpan = document.createElement('span');
+              charSpan.className = 'split-char';
+              charSpan.textContent = char;
+              wordSpan.appendChild(charSpan);
+              chars.push(charSpan);
+            });
+
+            fragment.appendChild(wordSpan);
+          }
+        });
+
+        node.parentNode.replaceChild(fragment, node);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        Array.from(node.childNodes).forEach(walk);
+      }
+    };
+
+    walk(element);
+    return chars;
+  }
+
   function initAnimations() {
     if (typeof gsap === 'undefined') return;
     if (typeof ScrollTrigger !== 'undefined') {
       gsap.registerPlugin(ScrollTrigger);
     }
+
+    const heroTitle = document.querySelector('.hero__title');
+    const heroChars = splitTextIntoChars(heroTitle);
 
     const introTl = gsap.timeline({
       defaults: { ease: 'power3.out' }
@@ -150,11 +193,78 @@
     }
 
     if (typeof ScrollTrigger !== 'undefined') {
+      const headerEl = document.getElementById('header');
+      const logoEl = document.querySelector('.logo');
+      const navEl = document.querySelector('.nav');
+      const actionsEl = document.querySelector('.header__actions');
+
+      if (headerEl && logoEl && actionsEl) {
+        const headerSplitTl = gsap.timeline({ paused: true });
+        headerSplitTl
+          .to(logoEl, { x: -48, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
+          .to(actionsEl, { x: 48, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
+          .to(navEl, { y: -18, opacity: 0, duration: 0.35, ease: 'power2.inOut' }, 0)
+          .to(headerEl, {
+            backgroundColor: 'rgba(250, 248, 245, 0)',
+            borderBottomColor: 'rgba(28, 27, 26, 0)',
+            backdropFilter: 'blur(0px)',
+            duration: 0.4,
+            ease: 'power2.out'
+          }, 0.05);
+
+        ScrollTrigger.create({
+          start: 'top -80',
+          end: 99999,
+          onUpdate: (self) => {
+            if (self.direction === 1 && self.scroll() > 140) {
+              headerSplitTl.play();
+              headerEl.style.pointerEvents = 'none';
+            } else if (self.direction === -1 || self.scroll() <= 140) {
+              headerSplitTl.reverse();
+              headerEl.style.pointerEvents = 'auto';
+            }
+          }
+        });
+      }
+
+      if (heroChars.length > 0) {
+        gsap.to(heroChars, {
+          x: () => gsap.utils.random(-90, 90),
+          y: () => gsap.utils.random(-110, -25),
+          rotation: () => gsap.utils.random(-28, 28),
+          scale: () => gsap.utils.random(0.75, 1.15),
+          opacity: 0,
+          stagger: {
+            amount: 0.35,
+            from: 'random'
+          },
+          ease: 'none',
+          scrollTrigger: {
+            trigger: '.hero',
+            start: 'top top',
+            end: 'bottom 25%',
+            scrub: 0.8
+          }
+        });
+      }
+
+      gsap.to('.hero__subtitle, .hero__cta-group', {
+        y: -35,
+        opacity: 0,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: '.hero',
+          start: 'top top',
+          end: '65% top',
+          scrub: 0.6
+        }
+      });
+
       gsap.utils.toArray('.reveal-up').forEach((el) => {
         gsap.from(el, {
-          y: 32,
+          y: 36,
           opacity: 0,
-          duration: 0.8,
+          duration: 0.85,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: el,
@@ -163,6 +273,47 @@
           }
         });
       });
+
+      gsap.utils.toArray('.craft-card').forEach((card, index) => {
+        const isEven = index % 2 === 1;
+        gsap.fromTo(card,
+          {
+            x: isEven ? 34 : -34,
+            rotation: isEven ? 1.5 : -1.5,
+            opacity: 0.35
+          },
+          {
+            x: 0,
+            rotation: 0,
+            opacity: 1,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 92%',
+              end: 'top 55%',
+              scrub: 0.7
+            }
+          }
+        );
+      });
+
+      const customWrapper = document.querySelector('.custom__wrapper');
+      if (customWrapper) {
+        gsap.fromTo(customWrapper,
+          { clipPath: 'inset(8% 4% 8% 4% round 6px)', scale: 0.97 },
+          {
+            clipPath: 'inset(0% 0% 0% 0% round 6px)',
+            scale: 1,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: customWrapper,
+              start: 'top 88%',
+              end: 'top 45%',
+              scrub: 0.6
+            }
+          }
+        );
+      }
 
       gsap.utils.toArray('.parallax-img').forEach((img) => {
         const speed = parseFloat(img.dataset.speed || '0.06');

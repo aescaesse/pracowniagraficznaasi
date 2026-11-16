@@ -114,7 +114,6 @@
         </div>
 
         <div class="products-grid" id="products-grid" aria-live="polite">
-          <!-- Renderowane dynamicznie z products.js -->
         </div>
       </div>
     </section>
@@ -265,18 +264,15 @@
     </div>
   </footer>
 
-  <!-- MODAL QUICK VIEW -->
   <div class="modal" id="quick-view-modal" role="dialog" aria-modal="true" aria-labelledby="qv-title" aria-hidden="true">
     <div class="modal__backdrop" data-close-modal></div>
     <div class="modal__container">
       <button type="button" class="modal__close" data-close-modal aria-label="Zamknij podgląd">&times;</button>
       <div class="qv-grid" id="qv-content">
-        <!-- Wypełniane dynamicznie przez app.js -->
       </div>
     </div>
   </div>
 
-  <!-- SLIDE-OVER CART DRAWER -->
   <aside class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" aria-hidden="true">
     <div class="cart-drawer__backdrop" id="cart-backdrop"></div>
     <div class="cart-drawer__panel">
@@ -286,7 +282,6 @@
       </div>
 
       <div class="cart-drawer__body" id="cart-items-container">
-        <!-- Lista produktów w koszyku -->
       </div>
 
       <div class="cart-drawer__footer" id="cart-footer">
@@ -310,10 +305,8 @@
     </div>
   </aside>
 
-  <!-- TOAST NOTIFICATION -->
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <!-- BIBLIOTEKI CDN: Lenis + GSAP + ScrollTrigger -->
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
