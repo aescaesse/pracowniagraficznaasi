@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Autorska pracownia graficzna i introligatorska. Wydruki artystyczne giclée, papeteria ślubna ze złoceniem oraz precyzyjne detale z plotera.">
+  <title>ATELIER PAPIERU — Pracownia Graficzna & Poligrafia Artystyczna</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="preloader" aria-hidden="true">
+    <div class="preloader__inner">
+      <span class="preloader__brand">ATELIER PAPIERU</span>
+      <div class="preloader__line"></div>
+    </div>
+  </div>
+
+  <header class="header" id="header">
+    <div class="container header__inner">
+      <a href="#" class="logo" aria-label="Strona główna Atelier Papieru">
+        <span class="logo__mark">AP</span>
+        <span class="logo__text">ATELIER PAPIERU</span>
+      </a>
+
+      <nav class="nav" aria-label="Nawigacja główna">
+        <ul class="nav__list">
+          <li><a href="#kolekcja" class="nav__link" data-filter-link="all">Kolekcja</a></li>
+          <li><a href="#kolekcja" class="nav__link" data-filter-link="prints">Wydruki</a></li>
+          <li><a href="#kolekcja" class="nav__link" data-filter-link="stationery">Papeteria</a></li>
+          <li><a href="#pracownia" class="nav__link">Papiery i Rzemiosło</a></li>
+          <li><a href="#wycena" class="nav__link">Projekty Indywidualne</a></li>
+        </ul>
+      </nav>
+
+      <div class="header__actions">
+        <button type="button" class="cart-trigger magnetic-btn" id="cart-open-btn" aria-label="Otwórz koszyk">
+          <span class="cart-trigger__label">Koszyk</span>
+          <span class="cart-trigger__count" id="cart-count">0</span>
+        </button>
+        <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Otwórz menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
+    <ul class="mobile-nav__list">
+      <li><a href="#kolekcja" class="mobile-nav__link">Wszystkie prace</a></li>
+      <li><a href="#pracownia" class="mobile-nav__link">Papiery i Rzemiosło</a></li>
+      <li><a href="#wycena" class="mobile-nav__link">Zamówienia indywidualne</a></li>
+    </ul>
+  </div>
+
+  <main id="main-content">
+    <section class="hero">
+      <div class="container hero__grid">
+        <div class="hero__content">
+          <p class="eyebrow hero-reveal">Pracownia Graficzna &amp; Poligrafia Butikowa</p>
+          <h1 class="hero__title hero-reveal">
+            Sztuka zamknięta w <em>bawełnianym</em> splocie papieru.
+          </h1>
+          <p class="hero__subtitle hero-reveal">
+            Tworzymy autorskie plakaty kolekcjonerskie, ręcznie złoconą papeterię ślubną oraz precyzyjne detale wycinane ploterem. Każdy egzemplarz powstaje w krótkich seriach z poszanowaniem tradycyjnego rzemiosła.
+          </p>
+          <div class="hero__cta-group hero-reveal">
+            <a href="#kolekcja" class="btn btn--primary magnetic-btn">Odkryj kolekcję</a>
+            <a href="#wycena" class="btn btn--ghost">Zapytaj o projekt custom</a>
+          </div>
+        </div>
+
+        <div class="hero__visuals">
+          <div class="hero__image-wrapper hero__image-wrapper--main image-reveal">
+            <img 
+              src="https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=1000&q=85" 
+              alt="Papeteria ślubna na papierze czerpanym z pieczęcią lakową" 
+              class="hero__img parallax-img"
+              data-speed="0.08"
+            >
+          </div>
+          <div class="hero__image-wrapper hero__image-wrapper--accent image-reveal">
+            <img 
+              src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=700&q=85" 
+              alt="Minimalistyczny plakat artystyczny oprawiony w dębową ramę" 
+              class="hero__img parallax-img"
+              data-speed="-0.05"
+            >
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="shop-section" id="kolekcja">
+      <div class="container">
+        <div class="section-header reveal-up">
+          <div>
+            <p class="eyebrow">Katalog Pracowni</p>
+            <h2 class="section-title">Wybrane edycje i papeteria</h2>
+          </div>
+          
+          <div class="filter-bar" role="tablist" aria-label="Filtruj produkty według kategorii">
+            <button type="button" class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">Wszystkie</button>
+            <button type="button" class="filter-btn" data-filter="prints" role="tab" aria-selected="false">Wydruki A3/A4</button>
+            <button type="button" class="filter-btn" data-filter="stationery" role="tab" aria-selected="false">Ślub i Papeteria</button>
+            <button type="button" class="filter-btn" data-filter="plotter" role="tab" aria-selected="false">Ploter i Detale</button>
+          </div>
+        </div>
+
+        <div class="products-grid" id="products-grid" aria-live="polite">
+          <!-- Renderowane dynamicznie z products.js -->
+        </div>
+      </div>
+    </section>
+
+    <section class="craft-section" id="pracownia">
+      <div class="container">
+        <div class="craft__grid">
+          <div class="craft__sticky reveal-up">
+            <p class="eyebrow">Materiałoznawstwo</p>
+            <h2 class="section-title">Dotyk, gramatura i szlachetny detal</h2>
+            <p class="craft__lead">
+              W cyfrowym świecie papier pozostaje jednym z najbardziej zmysłowych nośników. Pracujemy wyłącznie na bezkwasowych podłożach z certyfikatem FSC oraz 100% papierach bawełnianych Hahnemühle i Gmund.
+            </p>
+            <div class="craft__image-box image-reveal">
+              <img 
+                src="https://images.unsplash.com/photo-1603484477859-abe6a73f9366?auto=format&fit=crop&w=900&q=85" 
+                alt="Próbki papierów ozdobnych o różnej fakturze i gramaturze"
+                class="parallax-img"
+                data-speed="0.06"
+              >
+            </div>
+          </div>
+
+          <div class="craft__cards">
+            <article class="craft-card reveal-up">
+              <span class="craft-card__num">01</span>
+              <h3 class="craft-card__title">Papiery Bawełniane 300–600g</h3>
+              <p class="craft-card__text">
+                Głęboko matowe, mięsiste podłoża o wyczuwalnej strukturze filcu lub gładkiej satynie. Gwarantują muzealną trwałość pigmentu przez ponad 100 lat bez żółknięcia.
+              </p>
+              <span class="craft-card__meta">Hahnemühle Photo Rag • Gmund Cotton</span>
+            </article>
+
+            <article class="craft-card reveal-up">
+              <span class="craft-card__num">02</span>
+              <h3 class="craft-card__title">Hot-Stamping i Tłoczenie</h3>
+              <p class="craft-card__text">
+                Tradycyjne złocenie matrycą mosiężną na gorąco (szampańskie złoto, miedź, perła) oraz ślepy tłok (letterpress), który rzeźbi typografię bezpośrednio w strukturze włókien.
+              </p>
+              <span class="craft-card__meta">Matryce mosiężne • Głęboki relief</span>
+            </article>
+
+            <article class="craft-card reveal-up">
+              <span class="craft-card__num">03</span>
+              <h3 class="craft-card__title">Precyzyjne Cięcie Ploterowe</h3>
+              <p class="craft-card__text">
+                Wycinanie po obrysie z dokładnością do 0,1 mm. Tworzymy niestandardowe wykrojniki łukowe, etykiety produktowe, winietki 3D oraz toppery z akrylu i sklejki.
+              </p>
+              <span class="craft-card__meta">Naklejki premium • Wykrojniki na wymiar</span>
+            </article>
+
+            <article class="craft-card reveal-up">
+              <span class="craft-card__num">04</span>
+              <h3 class="craft-card__title">Ręczne Lakowanie i Konfekcja</h3>
+              <p class="craft-card__text">
+                Każde zaproszenie kompletujemy ręcznie — od wiązania jedwabnych wstążek po odlewanie woskowych pieczęci z autorskim stemplem pracowni.
+              </p>
+              <span class="craft-card__meta">Wosk elastyczny • Jedwab naturalny</span>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="custom-section" id="wycena">
+      <div class="container">
+        <div class="custom__wrapper reveal-up">
+          <div class="custom__info">
+            <p class="eyebrow">Zamówienia Indywidualne</p>
+            <h2 class="section-title">Zaprojektujmy coś unikatowego</h2>
+            <p class="custom__desc">
+              Planujesz uroczystość i marzysz o spójnej oprawie papeteryjnej? A może potrzebujesz limitowanej serii etykiet lub plakatów dla swojej marki? Opisz krótko swoją wizję, a przygotujemy kosztorys wraz z propozycją papierów w ciągu 24 godzin.
+            </p>
+            <ul class="custom__perks">
+              <li>Bezpłatny zestaw próbek papierów do każdego zlecenia</li>
+              <li>Indywidualny projekt graficzny i dobór typografii</li>
+              <li>Realizacja już od 20 sztuk (papeteria) lub 1 sztuki (wydruki)</li>
+            </ul>
+          </div>
+
+          <form class="custom-form" id="custom-quote-form" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="client-name" class="form-label">Imię i nazwisko / Marka *</label>
+                <input type="text" id="client-name" name="name" class="form-input" placeholder="np. Anna Kowalska" required>
+              </div>
+              <div class="form-group">
+                <label for="client-email" class="form-label">Adres e-mail *</label>
+                <input type="email" id="client-email" name="email" class="form-input" placeholder="anna@domena.pl" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="project-type" class="form-label">Rodzaj projektu</label>
+                <select id="project-type" name="projectType" class="form-select">
+                  <option value="Papeteria ślubna">Papeteria ślubna / okolicznościowa</option>
+                  <option value="Wydruki artystyczne">Wydruki artystyczne na zamówienie</option>
+                  <option value="Ploter i etykiety">Naklejki / etykiety / cięcie ploterowe</option>
+                  <option value="Identyfikacja wizualna">Kompleksowy projekt i druk dla marki</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="event-date" class="form-label">Planowany termin uroczystości / realizacji</label>
+                <input type="date" id="event-date" name="eventDate" class="form-input">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="project-details" class="form-label">Szczegóły, szacowany nakład, preferowane uszlachetnienia *</label>
+              <textarea id="project-details" name="details" rows="4" class="form-textarea" placeholder="Np. 60 zaproszeń ze złoceniem na papierze bawełnianym, koperty w kolorze szałwiowym + winietki..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full magnetic-btn">Wyślij zapytanie o wycenę</button>
+            <p class="form-feedback" id="quote-feedback" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__grid">
+      <div class="footer__brand">
+        <span class="logo__text">ATELIER PAPIERU</span>
+        <p class="footer__tagline">Autorska pracownia projektowania graficznego i szlachetnej poligrafii. Wysyłka bezpieczna na terenie całej Polski i UE.</p>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Sklep</h4>
+        <ul class="footer__links">
+          <li><a href="#kolekcja" data-filter-link="prints">Plakaty i Wydruki</a></li>
+          <li><a href="#kolekcja" data-filter-link="stationery">Papeteria Ślubna</a></li>
+          <li><a href="#kolekcja" data-filter-link="plotter">Projekty Ploterowe</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4 class="footer__heading">Informacje</h4>
+        <ul class="footer__links">
+          <li><a href="#pracownia">Rodzaje papierów</a></li>
+          <li><a href="#wycena">Zamówienia indywidualne</a></li>
+          <li><a href="mailto:kontakt@atelierpapieru.pl">kontakt@atelierpapieru.pl</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="container footer__bottom">
+      <p>&copy; 2026 ATELIER PAPIERU. Wszelkie prawa zastrzeżone.</p>
+      <p>Płatności obsługuje Stripe (BLIK, Karty, Apple Pay)</p>
+    </div>
+  </footer>
+
+  <!-- MODAL QUICK VIEW -->
+  <div class="modal" id="quick-view-modal" role="dialog" aria-modal="true" aria-labelledby="qv-title" aria-hidden="true">
+    <div class="modal__backdrop" data-close-modal></div>
+    <div class="modal__container">
+      <button type="button" class="modal__close" data-close-modal aria-label="Zamknij podgląd">&times;</button>
+      <div class="qv-grid" id="qv-content">
+        <!-- Wypełniane dynamicznie przez app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE-OVER CART DRAWER -->
+  <aside class="cart-drawer" id="cart-drawer" role="dialog" aria-modal="true" aria-labelledby="cart-drawer-title" aria-hidden="true">
+    <div class="cart-drawer__backdrop" id="cart-backdrop"></div>
+    <div class="cart-drawer__panel">
+      <div class="cart-drawer__header">
+        <h2 id="cart-drawer-title" class="cart-drawer__title">Twój koszyk</h2>
+        <button type="button" class="cart-drawer__close" id="cart-close-btn" aria-label="Zamknij koszyk">&times;</button>
+      </div>
+
+      <div class="cart-drawer__body" id="cart-items-container">
+        <!-- Lista produktów w koszyku -->
+      </div>
+
+      <div class="cart-drawer__footer" id="cart-footer">
+        <div class="cart-summary-row">
+          <span>Wartość produktów</span>
+          <span id="cart-subtotal">0,00 zł</span>
+        </div>
+        <div class="cart-summary-row">
+          <span>Dostawa kurierska (płaska paczka / tuba)</span>
+          <span id="cart-shipping">18,00 zł</span>
+        </div>
+        <div class="cart-summary-row cart-summary-row--total">
+          <span>Razem do zapłaty</span>
+          <span id="cart-total">0,00 zł</span>
+        </div>
+        <p class="cart-free-shipping-note" id="free-shipping-note">Darmowa dostawa dla zamówień powyżej 350,00 zł</p>
+        <button type="button" class="btn btn--primary btn--full" id="checkout-btn">
+          Przejdź do płatności (BLIK / Karta)
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- BIBLIOTEKI CDN: Lenis + GSAP + ScrollTrigger -->
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script src="products.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
