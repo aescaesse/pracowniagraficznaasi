@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -16,6 +16,11 @@
 
   <div class="preloader" aria-hidden="true">
     <div class="preloader__inner">
+      <svg class="preloader__svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect class="draw-frame" x="10" y="10" width="100" height="100" stroke="#141414" stroke-width="5.5" stroke-linejoin="miter"/>
+        <path class="draw-loop" d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="#141414" stroke-width="5.5" stroke-linecap="round"/>
+        <line class="draw-bar" x1="34" y1="77" x2="54" y2="77" stroke="#141414" stroke-width="5"/>
+      </svg>
       <span class="preloader__brand">PRACOWNIA GRAFICZNA ASI</span>
       <div class="preloader__line"></div>
     </div>
@@ -24,8 +29,15 @@
   <header class="header" id="header">
     <div class="container header__inner">
       <a href="#" class="logo" aria-label="Strona główna Pracownia Graficzna Asi">
-        <span class="logo__mark">PGA</span>
-        <span class="logo__text">PRACOWNIA GRAFICZNA ASI</span>
+        <svg class="logo__svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="10" y="10" width="100" height="100" stroke="currentColor" stroke-width="6.5"/>
+          <path d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
+          <line x1="34" y1="77" x2="54" y2="77" stroke="currentColor" stroke-width="6"/>
+        </svg>
+        <div class="logo__wordmark">
+          <span class="logo__text">PRACOWNIA GRAFICZNA</span>
+          <span class="logo__sub">Asi — Rzeszów</span>
+        </div>
       </a>
 
       <nav class="nav" aria-label="Nawigacja główna">
@@ -60,31 +72,40 @@
   </div>
 
   <main id="main-content">
-    <section class="hero">
+    <section class="hero" id="hero">
       <div class="container">
         <div class="hero__top-meta hero-reveal">
-          <span class="pill-tag">STUDIO POLIGRAFICZNE — RZESZÓW / PL</span>
-          <span class="pill-tag pill-tag--outline">GICLÉE • HOT-STAMPING • PLOTER</span>
+          <span class="frame-tag">STUDIO POLIGRAFICZNE — RZESZÓW</span>
+          <span class="frame-tag frame-tag--italic">Giclée • Hot-Stamping • Ploter</span>
         </div>
 
-        <h1 class="hero__title hero-reveal">
-          SZTUKA ZAMKNIĘTA W STRUKTURZE PAPIERU
+        <h1 class="hero__title">
+          <span class="hero__line hero__line--left hero-reveal">SZTUKA ZAMKNIĘTA</span>
+          <span class="hero__line hero__line--right hero-reveal">W <em class="serif-accent">strukturze</em> PAPIERU</span>
         </h1>
 
         <div class="hero__bento">
-          <div class="bento-card bento-card--visual-main image-reveal">
+          <div class="bento-card bento-card--left image-reveal">
             <img 
               src="https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=1100&q=85" 
               alt="Papeteria ślubna na papierze czerpanym z pieczęcią lakową" 
               class="parallax-img"
-              data-speed="0.06"
+              data-speed="0.08"
             >
             <span class="bento-card__label">01 / PAPETERIA ŚLUBNA &amp; ZŁOCENIE</span>
           </div>
 
-          <div class="bento-card bento-card--statement hero-reveal">
+          <div class="bento-card bento-card--center hero-reveal">
+            <div class="bento-card__monogram">
+              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="10" y="10" width="100" height="100" stroke="currentColor" stroke-width="5"/>
+                <path d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+                <line x1="34" y1="77" x2="54" y2="77" stroke="currentColor" stroke-width="4.5"/>
+              </svg>
+              <span>EDYCJA AUTORSKA 2026</span>
+            </div>
             <p class="bento-card__lead">
-              W Pracowni Graficznej Asi projektujemy i drukujemy autorskie plakaty kolekcjonerskie, tłoczoną papeterię okolicznościową oraz precyzyjne detale wycinane ploterem.
+              Projektujemy i drukujemy autorskie plakaty kolekcjonerskie, tłoczoną papeterię okolicznościową oraz precyzyjne detale wycinane ploterem.
             </p>
             <div class="hero__cta-group">
               <a href="#kolekcja" class="btn btn--primary magnetic-btn">Odkryj kolekcję</a>
@@ -92,12 +113,12 @@
             </div>
           </div>
 
-          <div class="bento-card bento-card--visual-side image-reveal">
+          <div class="bento-card bento-card--right image-reveal">
             <img 
               src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=85" 
               alt="Minimalistyczny plakat artystyczny oprawiony w ramę" 
               class="parallax-img"
-              data-speed="-0.05"
+              data-speed="-0.08"
             >
             <span class="bento-card__label">02 / WYDRUKI A4–B2</span>
           </div>
@@ -107,13 +128,13 @@
 
     <section class="shop-section" id="kolekcja">
       <div class="container">
-        <div class="section-header reveal-up">
-          <div>
+        <div class="section-header split-header">
+          <div class="split-header__left">
             <span class="eyebrow">01 / KATALOG PRACOWNI</span>
-            <h2 class="section-title">WYBRANE EDYCJE</h2>
+            <h2 class="section-title">WYBRANE <em class="serif-accent">edycje</em></h2>
           </div>
           
-          <div class="filter-bar" role="tablist" aria-label="Filtruj produkty według kategorii">
+          <div class="filter-bar split-header__right" role="tablist" aria-label="Filtruj produkty według kategorii">
             <button type="button" class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">Wszystkie</button>
             <button type="button" class="filter-btn" data-filter="prints" role="tab" aria-selected="false">Wydruki A3/A4</button>
             <button type="button" class="filter-btn" data-filter="stationery" role="tab" aria-selected="false">Ślub i Papeteria</button>
@@ -128,18 +149,18 @@
 
     <section class="craft-section" id="pracownia">
       <div class="container">
-        <div class="section-header reveal-up">
-          <div>
+        <div class="section-header split-header">
+          <div class="split-header__left">
             <span class="eyebrow">02 / SPECYFIKACJA TECHNICZNA</span>
-            <h2 class="section-title">PAPIERY I RZEMIOSŁO</h2>
+            <h2 class="section-title">PAPIERY I <em class="serif-accent">rzemiosło</em></h2>
           </div>
-          <p class="craft__header-note">
+          <p class="craft__header-note split-header__right">
             Pracujemy wyłącznie na bezkwasowych podłożach z certyfikatem FSC oraz 100% papierach bawełnianych Hahnemühle i Gmund.
           </p>
         </div>
 
         <div class="craft__bento">
-          <article class="craft-card reveal-up">
+          <article class="craft-card">
             <div class="craft-card__top">
               <span class="craft-card__num">[01]</span>
               <span class="craft-card__tag">300–600 GSM</span>
@@ -151,7 +172,7 @@
             <span class="craft-card__meta">Hahnemühle Photo Rag • Gmund Cotton</span>
           </article>
 
-          <article class="craft-card reveal-up">
+          <article class="craft-card">
             <div class="craft-card__top">
               <span class="craft-card__num">[02]</span>
               <span class="craft-card__tag">HOT-STAMPING</span>
@@ -163,7 +184,7 @@
             <span class="craft-card__meta">Matryce mosiężne • Głęboki relief</span>
           </article>
 
-          <article class="craft-card reveal-up">
+          <article class="craft-card">
             <div class="craft-card__top">
               <span class="craft-card__num">[03]</span>
               <span class="craft-card__tag">0.1 MM PRECISION</span>
@@ -175,7 +196,7 @@
             <span class="craft-card__meta">Naklejki premium • Wykrojniki na wymiar</span>
           </article>
 
-          <article class="craft-card reveal-up">
+          <article class="craft-card">
             <div class="craft-card__top">
               <span class="craft-card__num">[04]</span>
               <span class="craft-card__tag">HAND FINISHED</span>
@@ -192,10 +213,10 @@
 
     <section class="custom-section" id="wycena">
       <div class="container">
-        <div class="custom__wrapper reveal-up">
+        <div class="custom__wrapper">
           <div class="custom__info">
             <span class="eyebrow">03 / ZAMÓWIENIA INDYWIDUALNE</span>
-            <h2 class="section-title">PROJEKT NA WYMIAR</h2>
+            <h2 class="section-title">PROJEKT <em class="serif-accent">na wymiar</em></h2>
             <p class="custom__desc">
               Planujesz uroczystość i szukasz spójnej oprawy papeteryjnej? A może potrzebujesz limitowanej serii etykiet lub plakatów dla swojej marki? Opisz krótko swoją wizję — Asia przygotuje wycenę oraz dobór papierów w ciągu 24 godzin.
             </p>
@@ -250,7 +271,14 @@
   <footer class="footer">
     <div class="container footer__grid">
       <div class="footer__brand">
-        <span class="logo__text">PRACOWNIA GRAFICZNA ASI</span>
+        <div class="footer__logo-row">
+          <svg class="logo__svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="10" y="10" width="100" height="100" stroke="currentColor" stroke-width="6.5"/>
+            <path d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
+            <line x1="34" y1="77" x2="54" y2="77" stroke="currentColor" stroke-width="6"/>
+          </svg>
+          <span class="logo__text">PRACOWNIA GRAFICZNA ASI</span>
+        </div>
         <p class="footer__tagline">Autorska pracownia projektowania graficznego i szlachetnej poligrafii. Wysyłka bezpieczna na terenie całej Polski i UE.</p>
       </div>
       <div class="footer__col">
