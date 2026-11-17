@@ -1,424 +1,171 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pracownia graficzna Asi — Wydruki Artystyczne, Papeteria Ślubna & Ploter</title>
-  <meta name="description" content="Butikowa pracownia graficzna i poligraficzna. Autorskie plakaty na papierze bawełnianym, złocona papeteria ślubna oraz personalizowane projekty wycinane ploterem." />
-
-  <!-- Preconnect dla Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
-  <!-- Arkusz stylów -->
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AB for Wedding - Zaproszenia ślubne i papeteria okolicznościowa</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-  <!-- Subtelny preloader odsłaniający strukturę papieru -->
-  <div class="preloader" id="preloader" aria-hidden="true">
-    <div class="preloader__inner">
-      <span class="preloader__monogram">A &amp; P</span>
-      <p class="preloader__text">Pracownia graficzna Asi</p>
-      <div class="preloader__line"><span class="preloader__progress" id="preloaderProgress"></span></div>
-    </div>
-  </div>
-
-  <!-- Przyklejona nawigacja z efektem glassmorphism -->
-  <header class="header" id="header">
-    <div class="container header__container">
-      <a href="#" class="brand" aria-label="Pracownia graficzna Asi - Strona główna">
-        <span class="brand__title">Pracownia graficzna Asi</span>
-        <span class="brand__subtitle">Papier &bull; Typografia &bull; Detal</span>
-      </a>
-
-      <nav class="nav" id="mainNav" aria-label="Nawigacja główna">
-        <ul class="nav__list">
-          <li><a href="#kolekcja" class="nav__link" data-filter-jump="all">Kolekcja</a></li>
-          <li><a href="#kolekcja" class="nav__link" data-filter-jump="prints">Wydruki</a></li>
-          <li><a href="#kolekcja" class="nav__link" data-filter-jump="stationery">Papeteria Ślubna</a></li>
-          <li><a href="#proces" class="nav__link">Papiery i Rzemiosło</a></li>
-          <li><a href="#indywidualne" class="nav__link">Projekty Custom</a></li>
-        </ul>
-      </nav>
-
-      <div class="header__actions">
-        <button class="cart-trigger magnetic-btn" id="cartTrigger" aria-label="Otwórz koszyk" aria-expanded="false">
-          <span class="cart-trigger__label">Koszyk</span>
-          <span class="cart-trigger__badge" id="cartBadge">0</span>
-        </button>
-
-        <button class="mobile-toggle" id="mobileToggle" aria-label="Otwórz menu" aria-expanded="false">
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main id="smooth-content">
-    <!-- SEKCJA 1: HERO -->
-    <section class="hero">
-      <div class="container hero__grid">
-        <div class="hero__content">
-          <p class="eyebrow hero-reveal">Butikowe Studio Poligraficzne &bull; Est. 2021</p>
-          <h1 class="hero__title hero-reveal">
-            Szlachetny papier, <br />
-            <em>dotyk rzemiosła</em> <br />
-            i ponadczasowa forma.
-          </h1>
-          <p class="hero__description hero-reveal">
-            Projektujemy i drukujemy krótkie serie wydruków artystycznych na bawełnie,
-            złoconą papeterię ślubną oraz precyzyjne detale cięte ploterem. Każdy arkusz przechodzi przez nasze dłonie.
-          </p>
-          <div class="hero__cta-group hero-reveal">
-            <a href="#kolekcja" class="btn btn--primary magnetic-btn">
-              <span>Odkryj kolekcję</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </a>
-            <a href="#indywidualne" class="btn btn--ghost">Zamów projekt indywidualny</a>
-          </div>
-
-          <div class="hero__meta hero-reveal">
-            <div class="hero__meta-item">
-              <strong>300–350 g/m²</strong>
-              <span>Papiery bawełniane</span>
+    <!-- HEADER -->
+    <header id="header" class="header has-sticky sticky-jump">
+        <div class="header-wrapper">
+            <!-- TOP BAR -->
+            <div id="top-bar" class="header-top nav-dark">
+                <div class="flex-row container">
+                    <div class="flex-col flex-left">
+                        <ul class="nav nav-left nav-small nav-divided">
+                            <li class="menu-item"><a href="https://www.facebook.com/abforwedding/" target="_blank"><i class="fab fa-facebook-f"></i></a></li>
+                            <li class="menu-item"><a href="https://www.instagram.com/abforwedding/" target="_blank"><i class="fab fa-instagram"></i></a></li>
+                            <li class="menu-item"><a href="https://www.tiktok.com/@abforwedding" target="_blank"><i class="fab fa-tiktok"></i></a></li>
+                        </ul>
+                    </div>
+                    <div class="flex-col flex-right">
+                        <ul class="nav top-bar-nav nav-right nav-small nav-divided">
+                            <li class="account-item"><a href="#" title="Moje konto"><i class="icon-user fa-regular fa-user"></i> Konto</a></li>
+                            <li class="cart-item"><a href="#" title="Koszyk"><i class="fa-solid fa-bag-shopping"></i> <span id="cart-count">0</span> zł</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="hero__meta-divider"></div>
-            <div class="hero__meta-item">
-              <strong>Hot-Stamping</strong>
-              <span>Ręczne złocenie i lak</span>
-            </div>
-          </div>
-        </div>
 
-        <div class="hero__visuals">
-          <div class="hero__image-main reveal-mask" data-parallax="-0.06">
-            <img 
-              src="https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1100&q=85" 
-              alt="Złocona papeteria ślubna na papierze bawełnianym z pieczęcią lakową" 
-              loading="eager"
-            />
-          </div>
-          <div class="hero__image-floating reveal-mask" data-parallax="0.08">
-            <img 
-              src="https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=600&q=85" 
-              alt="Zbliżenie na strukturę fakturowanego papieru czerpanego" 
-              loading="eager"
-            />
-            <span class="hero__caption">Gmund Cotton 350g &bull; Detal</span>
-          </div>
+            <!-- MAIN HEADER -->
+            <div id="masthead" class="header-main">
+                <div class="header-inner flex-row container logo-left">
+                    <!-- Logo -->
+                    <div id="logo" class="flex-col logo">
+                        <a href="index.html" rel="home">
+                            <img src="https://abforwedding.pl/wp-content/uploads/2021/01/jheszcze-01.png" class="header_logo" alt="AB for Wedding" width="200">
+                        </a>
+                    </div>
+
+                    <!-- Mobile Menu Toggle -->
+                    <div class="flex-col show-for-medium flex-left">
+                        <button id="mobile-menu-toggle" class="mobile-nav-icon"><i class="fa-solid fa-bars"></i> Menu</button>
+                    </div>
+
+                    <!-- Navigation Desktop -->
+                    <div class="flex-col hide-for-medium flex-grow">
+                        <ul class="header-nav header-nav-main nav nav-left nav-uppercase">
+                            <li><a href="index.html" class="nav-top-link">Home</a></li>
+                            <li class="menu-item-has-children has-dropdown">
+                                <a href="#sklep" class="nav-top-link">Sklep <i class="fa-solid fa-angle-down"></i></a>
+                                <ul class="sub-menu nav-dropdown nav-dropdown-default">
+                                    
+                                    <!-- Kolumna 1: Papeteria ślubna -->
+                                    <li class="nav-dropdown-col"><a href="#"><b>Papeteria ślubna</b></a>
+                                        <ul class="sub-menu nav-column">
+                                            <li><a href="#">Zaproszenia</a></li>
+                                            <li><a href="#">Zawiadomienia "Save the date"</a></li>
+                                            <li><a href="#">Winietki</a></li>
+                                            <li><a href="#">Menu weselne</a></li>
+                                            <li><a href="#">Plan stołów</a></li>
+                                            <li><a href="#">Tablica powitalna</a></li>
+                                            <li><a href="#">Zawieszki na alkohol</a></li>
+                                            <li><a href="#">Etykiety na ciasta</a></li>
+                                            <li><a href="#">Naklejki na tort</a></li>
+                                            <li><a href="#">Karty z podziękowaniami</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Kolumna 2: Naklejki i etykiety -->
+                                    <li class="nav-dropdown-col"><a href="#"><b>Naklejki i etykiety</b></a>
+                                        <ul class="sub-menu nav-column">
+                                            <li><a href="#">Naklejki ozdobne</a></li>
+                                            <li><a href="#">Naklejki motoryzacyjne</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Kolumna 3: Urodziny i przyjęcia -->
+                                    <li class="nav-dropdown-col"><a href="#"><b>Urodziny i przyjęcia</b></a>
+                                        <ul class="sub-menu nav-column">
+                                            <li><a href="#">Zaproszenia urodzinowe</a></li>
+                                            <li><a href="#">Zaproszenia na chrzest</a></li>
+                                            <li><a href="#">Zaproszenia na komunię</a></li>
+                                            <li><a href="#">Zaproszenia baby shower</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Kolumna 4: Okolicznościowe -->
+                                    <li class="nav-dropdown-col"><a href="#"><b>Okolicznościowe</b></a>
+                                        <ul class="sub-menu nav-column">
+                                            <li><a href="#">Chrzest</a></li>
+                                            <li><a href="#">Komunia</a></li>
+                                            <li><a href="#">Urodziny</a></li>
+                                            <li><a href="#">Zaproszenia na rocznicę</a></li>
+                                            <li><a href="#">Jubileusze</a></li>
+                                            <li><a href="#">Dzień Matki</a></li>
+                                            <li><a href="#">Dzień Ojca</a></li>
+                                        </ul>
+                                    </li>
+
+                                    <!-- Kolumna 5: Sezonowe -->
+                                    <li class="nav-dropdown-col"><a href="#"><b>Sezonowe</b></a>
+                                        <ul class="sub-menu nav-column">
+                                            <li><a href="#">Wielkanoc</a></li>
+                                            <li><a href="#">Boże Narodzenie</a></li>
+                                            <li><a href="#">Walentynki</a></li>
+                                            <li><a href="#">Dzień Kobiet</a></li>
+                                            <li><a href="#">Dzień Matki</a></li>
+                                            <li><a href="#">Dzień Ojca</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li><a href="#" class="nav-top-link">Kolekcje</a></li>
+                            <li><a href="#" class="nav-top-link">Blog</a></li>
+                            <li><a href="#" class="nav-top-link">Kontakt</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero-section text-center">
+        <div class="container">
+            <h1 class="heading-script">Wyjątkowa papeteria na Twoje wydarzenie</h1>
+            <p>Zaproszenia ślubne, dodatki i dekoracje stworzone z pasją i dbałością o każdy detal.</p>
+            <a href="#produkty" class="button primary">Odkryj kolekcje</a>
+        </div>
     </section>
 
-    <!-- SEKCJA 2: FILTROWANA GALERIA / SKLEP -->
-    <section class="shop section-padding" id="kolekcja">
-      <div class="container">
-        <div class="section-header scroll-reveal">
-          <div>
-            <p class="eyebrow">Sklep &amp; Archiwum Prac</p>
-            <h2 class="section-title">Wyselekcjonowane edycje</h2>
-          </div>
-
-          <!-- Filtry kategorii -->
-          <div class="filter-bar" role="tablist" aria-label="Filtruj produkty według kategorii">
-            <button class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">Wszystkie</button>
-            <button class="filter-btn" data-filter="prints" role="tab" aria-selected="false">Wydruki A3/A4</button>
-            <button class="filter-btn" data-filter="stationery" role="tab" aria-selected="false">Ślub i Papeteria</button>
-            <button class="filter-btn" data-filter="plotter" role="tab" aria-selected="false">Ploter i Detale</button>
-          </div>
+    <!-- MAIN PRODUCT CATALOG SECTION -->
+    <main id="produkty" class="container section">
+        <div class="section-title text-center">
+            <h2>Polecane Produkty</h2>
+            <div class="is-divider"></div>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="product-filters text-center">
+            <button class="filter-btn active" data-filter="all">Wszystkie</button>
+            <button class="filter-btn" data-filter="papeteria">Papeteria ślubna</button>
+            <button class="filter-btn" data-filter="naklejki">Naklejki i etykiety</button>
+            <button class="filter-btn" data-filter="urodziny">Urodziny i przyjęcia</button>
+            <button class="filter-btn" data-filter="okolicznosciowe">Okolicznościowe</button>
         </div>
 
-        <!-- Siatka produktów renderowana dynamicznie przez app.js -->
-        <div class="products-grid" id="productsGrid" aria-live="polite">
-          <!-- Karty produktów zostaną wstrzyknięte tutaj -->
+        <!-- Dynamic Product Grid -->
+        <div id="product-grid" class="row-products">
+            <!-- Generowane przez app.js -->
         </div>
-      </div>
-    </section>
+    </main>
 
-    <!-- SEKCJA 3: PROCES I PAPIERY -->
-    <section class="craft section-padding" id="proces">
-      <div class="container">
-        <div class="craft__layout">
-          <div class="craft__intro scroll-reveal">
-            <p class="eyebrow">Materiał i Technologia</p>
-            <h2 class="section-title">Papier nie jest tylko tłem — jest połową projektu.</h2>
-            <p class="craft__lead">
-              Współpracujemy z europejskimi papierniami (Gmund, Fedrigoni, Hahnemühle), wybierając podłoża o wyczuwalnej fakturze, ciepłym odcieniu naturalnej bieli i wysokim wolumenie.
-            </p>
-            <div class="craft__image-wrap reveal-mask" data-parallax="-0.04">
-              <img 
-                src="https://images.unsplash.com/photo-1517842645767-c639042777db?auto=format&fit=crop&w=900&q=85" 
-                alt="Wzorniki papierów ozdobnych i narzędzia introligatorskie w pracowni" 
-                loading="lazy"
-              />
-            </div>
-          </div>
-
-          <div class="craft__pillars">
-            <article class="pillar-card scroll-reveal">
-              <span class="pillar-card__number">01</span>
-              <h3 class="pillar-card__title">Papiery Bawełniane i Czerpane</h3>
-              <p class="pillar-card__text">
-                Gramatury od 285g do 600g (kaszerowane). Miękkie w dotyku włókna bawełny idealnie przyjmują tusze pigmentowe oraz głębokie tłoczenia bez pękania struktury.
-              </p>
-              <span class="pillar-card__tag">Hahnemühle 308g &bull; Gmund Cotton</span>
-            </article>
-
-            <article class="pillar-card scroll-reveal">
-              <span class="pillar-card__number">02</span>
-              <h3 class="pillar-card__title">Hot-Stamping i Suchy Tłok</h3>
-              <p class="pillar-card__text">
-                Tradycyjne uszlachetnianie z wykorzystaniem matryc mosiężnych. Szlachetne, satynowe złoto oraz wklęsły relief (letterpress), który czuć pod opuszkami palców.
-              </p>
-              <span class="pillar-card__tag">Folie matowe &bull; Pieczęcie lakowe</span>
-            </article>
-
-            <article class="pillar-card scroll-reveal">
-              <span class="pillar-card__number">03</span>
-              <h3 class="pillar-card__title">Precyzyjny Ploter Tnący</h3>
-              <p class="pillar-card__text">
-                Wycinamy skomplikowane kształty, łuki, ażurowe winietki oraz nacinamy etykiety (kiss-cut) z dokładnością do dziesiątych części milimetra, bez przypaleń laserowych.
-              </p>
-              <span class="pillar-card__tag">Czyste krawędzie &bull; Dowolne wykrojniki</span>
-            </article>
-
-            <article class="pillar-card scroll-reveal">
-              <span class="pillar-card__number">04</span>
-              <h3 class="pillar-card__title">Druk Pigmentowy Giclée</h3>
-              <p class="pillar-card__text">
-                12-kolorowy system tuszów archiwalnych o muzealnej trwałości barw. Głęboka czerń atramentowa i wierne odwzorowanie akwareli oraz ilustracji autorskich.
-              </p>
-              <span class="pillar-card__tag">Odporność UV 100+ lat</span>
-            </article>
-          </div>
+    <!-- FOOTER -->
+    <footer id="footer" class="footer-wrapper">
+        <div class="container text-center py-4">
+            <p>&copy; 2026 AB for Wedding. Wszelkie prawa zastrzeżone.</p>
         </div>
-      </div>
-    </section>
+    </footer>
 
-    <!-- SEKCJA 4: ZAMÓWIENIA INDYWIDUALNE -->
-    <section class="custom-order section-padding" id="indywidualne">
-      <div class="container">
-        <div class="custom-order__box scroll-reveal">
-          <div class="custom-order__info">
-            <p class="eyebrow">Bespoke Studio</p>
-            <h2 class="section-title">Zamówienia indywidualne i wzorniki</h2>
-            <p class="custom-order__desc">
-              Planujesz oprawę papeteryjną ślubu, potrzebujesz autorskiej ilustracji w niestandardowym formacie lub dedykowanych etykiet dla swojej marki? Opisz krótko swój pomysł — przygotuję wycenę oraz propozycję papierów w ciągu 24h.
-            </p>
-            <ul class="custom-order__perks">
-              <li>Możliwość zamówienia pakietu próbek papieru przed realizacją</li>
-              <li>Indywidualny projekt graficzny i dobór typografii</li>
-              <li>Realizacje już od 15 sztuk (papeteria) lub 1 sztuki (wydruki)</li>
-            </ul>
-          </div>
-
-          <form class="custom-form" id="customOrderForm" novalidate>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="clientName">Imię i nazwisko *</label>
-                <input type="text" id="clientName" name="clientName" placeholder="np. Anna Kowalska" required />
-              </div>
-              <div class="form-group">
-                <label for="clientEmail">Adres e-mail *</label>
-                <input type="email" id="clientEmail" name="clientEmail" placeholder="anna@domena.pl" required />
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="projectType">Rodzaj projektu</label>
-                <select id="projectType" name="projectType">
-                  <option value="Papeteria ślubna (komplet)">Papeteria ślubna (komplet)</option>
-                  <option value="Wydruk artystyczny / format custom">Wydruk artystyczny / format niestandardowy</option>
-                  <option value="Projekty z plotera / etykiety dla marki">Projekty z plotera / etykiety dla marki</option>
-                  <option value="Zestaw próbek papieru (Wzornik)">Zestaw próbek papieru (Wzornik)</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label for="eventDate">Planowany termin uroczystości / realizacji</label>
-                <input type="date" id="eventDate" name="eventDate" />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="projectDetails">Szczegóły projektu (nakład, kolorystyka, ulubione uszlachetnienia) *</label>
-              <textarea id="projectDetails" name="projectDetails" rows="4" placeholder="Opisz krótko nakład (np. 60 zaproszeń), preferowaną kolorystykę lub format..." required></textarea>
-            </div>
-
-            <div class="custom-form__footer">
-              <button type="submit" class="btn btn--primary magnetic-btn">
-                <span>Wyślij zapytanie o wycenę</span>
-              </button>
-              <p class="form-feedback" id="customFormFeedback" role="status" aria-live="polite"></p>
-            </div>
-          </form>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- STOPKA -->
-  <footer class="footer">
-    <div class="container footer__grid">
-      <div class="footer__brand">
-        <span class="brand__title">Pracownia graficzna Asi</span>
-        <p class="footer__about">
-          Autorskie studio projektowe i mała poligrafia rzemieślnicza. Tworzymy rzeczy, które zostają na dłużej niż jeden sezon.
-        </p>
-      </div>
-
-      <div class="footer__col">
-        <h4>Oferta</h4>
-        <ul>
-          <li><a href="#kolekcja" data-filter-jump="prints">Wydruki Giclée</a></li>
-          <li><a href="#kolekcja" data-filter-jump="stationery">Papeteria ślubna</a></li>
-          <li><a href="#kolekcja" data-filter-jump="plotter">Cięcie ploterem</a></li>
-          <li><a href="#indywidualne">Wzorniki papierów</a></li>
-        </ul>
-      </div>
-
-      <div class="footer__col">
-        <h4>Informacje</h4>
-        <ul>
-          <li><a href="#proces">Papiery i gramatury</a></li>
-          <li><a href="#indywidualne">Czas realizacji i wysyłka</a></li>
-          <li><a href="mailto:kontakt@pracowniaasi.pl">kontakt@pracowniaasi.pl</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="container footer__bottom">
-      <p>&copy; <span id="currentYear"></span> Pracownia graficzna Asi. Wszystkie prawa zastrzeżone.</p>
-      <p>Zaprojektowano z dbałością o każdy milimetr papieru.</p>
-    </div>
-  </footer>
-
-  <!-- MODAL SZYBKIEGO PODGLĄDU (QUICK VIEW) Z KONFIGURATOREM WARIANTÓW -->
-  <div class="modal-backdrop" id="quickViewModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="qvTitle">
-    <div class="modal-dialog">
-      <button class="modal-close" id="closeQuickView" aria-label="Zamknij podgląd produktu">&times;</button>
-      
-      <div class="qv-grid">
-        <div class="qv-gallery">
-          <div class="qv-image-stage" id="qvZoomStage">
-            <img id="qvMainImg" src="" alt="" />
-            <span class="qv-zoom-hint">Najedź kursorem, aby powiększyć fakturę papieru</span>
-          </div>
-          <div class="qv-thumbs">
-            <button class="qv-thumb is-active" id="qvThumbMain" aria-label="Widok główny">
-              <img src="" alt="" />
-            </button>
-            <button class="qv-thumb" id="qvThumbDetail" aria-label="Zbliżenie na detal papieru">
-              <img src="" alt="" />
-            </button>
-          </div>
-        </div>
-
-        <div class="qv-details">
-          <span class="eyebrow" id="qvCategory">Kategoria</span>
-          <h2 class="qv-title" id="qvTitle">Nazwa produktu</h2>
-          <p class="qv-subtitle" id="qvSubtitle">Podtytuł</p>
-          
-          <div class="qv-price-row">
-            <span class="qv-price" id="qvPrice">0,00 zł</span>
-            <span class="qv-unit-info" id="qvUnitInfo">/ szt.</span>
-          </div>
-
-          <p class="qv-description" id="qvDescription"></p>
-
-          <ul class="qv-specs" id="qvSpecs"></ul>
-
-          <!-- Konfigurator wariantów -->
-          <div class="qv-config">
-            <div class="qv-option-group">
-              <label for="qvSizeSelect">Format / Wariant:</label>
-              <select id="qvSizeSelect" class="qv-select"></select>
-            </div>
-
-            <div class="qv-option-group">
-              <label for="qvPaperSelect">Rodzaj papieru i wykończenie:</label>
-              <select id="qvPaperSelect" class="qv-select"></select>
-            </div>
-
-            <div class="qv-purchase-row">
-              <div class="qty-control" aria-label="Wybór ilości">
-                <button type="button" id="qvQtyMinus" aria-label="Zmniejsz ilość">&minus;</button>
-                <input type="number" id="qvQtyInput" value="1" min="1" readonly />
-                <button type="button" id="qvQtyPlus" aria-label="Zwiększ ilość">+</button>
-              </div>
-
-              <button type="button" class="btn btn--primary qv-add-btn" id="qvAddToCart">
-                Dodaj do koszyka
-              </button>
-            </div>
-            <p class="qv-min-note" id="qvMinNote"></p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BOCZNA SZUFLADA KOSZYKA (SLIDE-OVER CART DRAWER) -->
-  <div class="drawer-backdrop" id="cartBackdrop" aria-hidden="true"></div>
-  <aside class="cart-drawer" id="cartDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Twój koszyk">
-    <div class="cart-drawer__header">
-      <div>
-        <h2 class="cart-drawer__title">Twój koszyk</h2>
-        <p class="cart-drawer__sub">Darmowa dostawa kurierem od 350 zł</p>
-      </div>
-      <button class="modal-close" id="closeCartDrawer" aria-label="Zamknij koszyk">&times;</button>
-    </div>
-
-    <!-- Pasek postępu darmowej dostawy -->
-    <div class="shipping-progress">
-      <p class="shipping-progress__text" id="shippingText">Do darmowej dostawy brakuje <strong>350,00 zł</strong></p>
-      <div class="shipping-progress__bar">
-        <span class="shipping-progress__fill" id="shippingFill" style="width: 0%"></span>
-      </div>
-    </div>
-
-    <div class="cart-drawer__body" id="cartItemsContainer">
-      <!-- Elementy koszyka renderowane dynamicznie -->
-    </div>
-
-    <div class="cart-drawer__footer" id="cartFooter">
-      <div class="cart-summary">
-        <div class="cart-summary__row">
-          <span>Wartość produktów</span>
-          <span id="cartSubtotal">0,00 zł</span>
-        </div>
-        <div class="cart-summary__row">
-          <span>Dostawa (Kurier / Paczkomat)</span>
-          <span id="cartShipping">16,00 zł</span>
-        </div>
-        <div class="cart-summary__row cart-summary__row--total">
-          <span>Razem do zapłaty</span>
-          <span id="cartTotal">0,00 zł</span>
-        </div>
-      </div>
-
-      <button type="button" class="btn btn--primary btn--full" id="checkoutBtn">
-        <span>Przejdź do płatności (BLIK / Karta)</span>
-      </button>
-      <p class="cart-drawer__secure">Bezpieczne płatności obsługiwane przez Stripe Checkout</p>
-    </div>
-  </aside>
-
-  <!-- Powiadomienie Toast po dodaniu do koszyka -->
-  <div class="toast" id="toastNotification" role="status" aria-live="polite"></div>
-
-  <!-- SKRYPTY CDN: Lenis (Smooth Scroll) oraz GSAP + ScrollTrigger -->
-  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <!-- Dane produktów i główna logika aplikacji -->
-  <script src="products.js"></script>
-  <script src="app.js"></script>
+    <!-- Scripts -->
+    <script src="products.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

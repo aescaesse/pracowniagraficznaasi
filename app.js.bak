@@ -1,1142 +1,651 @@
-(() => {
-  'use strict';
+/**
+ * Pracownia graficzna Asi — Główny Moduł Logiki (Vanilla JS ES6+)
+ * Odpowiada za: Lenis Smooth Scroll, GSAP ScrollTrigger, dynamiczne filtrowanie,
+ * interaktywny modal Quick View, koszyk w localStorage oraz obsługę płatności Stripe.
+ */
 
-  const STORAGE_KEY = 'pracownia_graficzna_asi_cart_v1';
-  const SHIPPING_COST = 18;
+document.addEventListener('DOMContentLoaded', () => {
+  // ==========================================================================
+  // 1. STAN APLIKACJI I INICJALIZACJA
+  // ==========================================================================
+  let cart = JSON.parse(localStorage.getItem('pracownia_cart')) || [];
+  let currentFilter = 'all';
+  let activeQuickViewProduct = null;
+  let selectedSizeIndex = 0;
+  let selectedPaperIndex = 0;
+  let currentQty = 1;
+
+  // Stałe handlowe
   const FREE_SHIPPING_THRESHOLD = 350;
-  const STRIPE_CONFIG = {
-    publishableKey: 'pk_live_twoj_klucz_publiczny_stripe',
-    checkoutEndpoint: '/api/create-checkout-session',
-    currency: 'pln',
-    paymentMethodTypes: ['blik', 'card', 'p24']
-  };
+  const BASE_SHIPPING_COST = 16;
 
-  let cart = loadCart();
-  let activeCategory = 'all';
-  let lenisInstance = null;
-  let heroSplitInstance = null;
-  let sectionSplitInstances = [];
+  // Inicjalizacja głównych systemów
+  initPreloader();
+  initLenisAndScrollTrigger();
+  initNavigation();
+  renderProducts();
+  updateCartUI();
+  initQuickViewModal();
+  initCustomOrderForm();
+  initStripeCheckout();
 
-  const dom = {
-    preloader: document.querySelector('.preloader'),
-    preloaderLine: document.querySelector('.preloader__line'),
-    header: document.getElementById('header'),
-    scrollProgress: document.getElementById('scroll-progress'),
-    velocityStage: document.querySelector('.velocity-stage'),
-    productsGrid: document.getElementById('products-grid'),
-    filterButtons: document.querySelectorAll('.filter-btn'),
-    navFilterLinks: document.querySelectorAll('[data-filter-link]'),
-    cartOpenBtn: document.getElementById('cart-open-btn'),
-    cartCloseBtn: document.getElementById('cart-close-btn'),
-    cartBackdrop: document.getElementById('cart-backdrop'),
-    cartDrawer: document.getElementById('cart-drawer'),
-    cartCount: document.getElementById('cart-count'),
-    cartItemsContainer: document.getElementById('cart-items-container'),
-    cartFooter: document.getElementById('cart-footer'),
-    cartSubtotal: document.getElementById('cart-subtotal'),
-    cartShipping: document.getElementById('cart-shipping'),
-    cartTotal: document.getElementById('cart-total'),
-    freeShippingNote: document.getElementById('free-shipping-note'),
-    checkoutBtn: document.getElementById('checkout-btn'),
-    qvModal: document.getElementById('quick-view-modal'),
-    qvContent: document.getElementById('qv-content'),
-    mobileMenuBtn: document.getElementById('mobile-menu-btn'),
-    mobileNav: document.getElementById('mobile-nav'),
-    quoteForm: document.getElementById('custom-quote-form'),
-    quoteFeedback: document.getElementById('quote-feedback'),
-    toast: document.getElementById('toast')
-  };
+  // Aktualizacja roku w stopce
+  const yearEl = document.getElementById('currentYear');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-  function formatPrice(amount) {
-    return new Intl.NumberFormat('pl-PL', {
-      style: 'currency',
-      currency: 'PLN',
-      minimumFractionDigits: 2
-    }).format(amount);
+  // ==========================================================================
+  // 2. PRELOADER & ANIMACJE WEJŚCIA (GSAP)
+  // ==========================================================================
+  function initPreloader() {
+    const preloader = document.getElementById('preloader');
+    const progressBar = document.getElementById('preloaderProgress');
+
+    // Symulacja postępu ładowania arkusza papieru
+    gsap.to(progressBar, {
+      scaleX: 1,
+      duration: 0.8,
+      ease: 'power2.out',
+      onComplete: () => {
+        setTimeout(() => {
+          preloader.classList.add('is-loaded');
+          // Uruchom animacje sekcji Hero po zdjęciu preloadera
+          triggerHeroAnimations();
+        }, 300);
+      }
+    });
   }
 
-  function loadCart() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function saveCart() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
-    } catch {
-      return;
-    }
-  }
-
-  let toastTimer = null;
-  function showToast(message) {
-    if (!dom.toast) return;
-    dom.toast.textContent = message;
-    dom.toast.classList.add('is-visible');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-      dom.toast.classList.remove('is-visible');
-    }, 3000);
-  }
-
-  function initSmoothScroll() {
-    if (typeof Lenis === 'undefined') return;
-
-    lenisInstance = new Lenis({
+  function initLenisAndScrollTrigger() {
+    // Inicjalizacja Lenis dla jedwabistego scrolla
+    const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
     });
 
-    const isDesktop = () => window.innerWidth >= 1024;
-    let currentSkew = 0;
-
-    lenisInstance.on('scroll', (e) => {
-      if (typeof ScrollTrigger !== 'undefined') {
-        ScrollTrigger.update();
-      }
-
-      if (dom.scrollProgress) {
-        dom.scrollProgress.style.transform = `scaleX(${e.progress || 0})`;
-      }
-
-      if (dom.header) {
-        if (e.scroll > 30) {
-          dom.header.classList.add('is-scrolled');
-        } else {
-          dom.header.classList.remove('is-scrolled');
-        }
-
-        if (e.direction === 1 && e.scroll > 350 && !dom.mobileNav?.classList.contains('is-open')) {
-          dom.header.classList.add('is-hidden');
-        } else if (e.direction === -1 || e.scroll <= 350) {
-          dom.header.classList.remove('is-hidden');
-        }
-      }
-
-      if (dom.velocityStage && isDesktop()) {
-        const targetSkew = Math.max(-1.4, Math.min(1.4, (e.velocity || 0) * 0.04));
-        currentSkew += (targetSkew - currentSkew) * 0.14;
-        dom.velocityStage.style.transform = Math.abs(currentSkew) > 0.01 ? `skewY(${currentSkew.toFixed(3)}deg)` : '';
-      }
-    });
-
-    if (typeof gsap !== 'undefined') {
-      gsap.ticker.add((time) => {
-        lenisInstance.raf(time * 1000);
-      });
-      gsap.ticker.lagSmoothing(0);
-    } else {
-      const raf = (time) => {
-        lenisInstance.raf(time);
-        requestAnimationFrame(raf);
-      };
+    function raf(time) {
+      lenis.raf(time);
       requestAnimationFrame(raf);
     }
+    requestAnimationFrame(raf);
 
-    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-      anchor.addEventListener('click', (e) => {
-        const targetId = anchor.getAttribute('href');
-        if (!targetId || targetId === '#') return;
-        const targetEl = document.querySelector(targetId);
-        if (targetEl) {
-          e.preventDefault();
-          closeMobileMenu();
-          lenisInstance.scrollTo(targetEl, { offset: -76 });
-        }
-      });
+    // Integracja Lenis z GSAP ScrollTrigger
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => {
+      lenis.raf(time * 1000);
     });
-  }
+    gsap.ticker.lagSmoothing(0);
 
-  function buildTextSplits() {
-    if (typeof SplitType === 'undefined') return;
-
-    if (heroSplitInstance) {
-      heroSplitInstance.revert();
-    }
-    sectionSplitInstances.forEach((inst) => inst.revert());
-    sectionSplitInstances = [];
-
-    const heroTitle = document.getElementById('hero-dissolve-title');
-    if (heroTitle) {
-      heroSplitInstance = new SplitType(heroTitle, { types: 'words,chars' });
-    }
-
-    document.querySelectorAll('.dissolve-heading').forEach((heading) => {
-      const inst = new SplitType(heading, { types: 'words,chars' });
-      sectionSplitInstances.push(inst);
-    });
-  }
-
-  /* Pinned Liquid Melt Hero + Rozpływanie sekcji */
-  function setupLiquidTypography() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-
-    ScrollTrigger.getAll()
-      .filter((st) => st.vars && st.vars.id && st.vars.id.startsWith('liquid-'))
-      .forEach((st) => st.kill());
-
-    const heroSection = document.getElementById('hero');
-    const displacementEl = document.getElementById('liquid-displacement');
-    const turbulenceEl = document.getElementById('liquid-turbulence');
-    const heroOrb = document.getElementById('hero-orb');
-
-    // Interaktywna reakcja falowania na ruch kursora w Hero
-    if (heroSection && displacementEl && turbulenceEl) {
-      let isHoveringHero = false;
-      heroSection.addEventListener('pointermove', (e) => {
-        if (window.scrollY > window.innerHeight * 0.35) return;
-        const rect = heroSection.getBoundingClientRect();
-        const nx = (e.clientX - rect.left) / rect.width - 0.5;
-        const ny = (e.clientY - rect.top) / rect.height - 0.5;
-
-        if (heroOrb) {
-          gsap.to(heroOrb, {
-            x: nx * 160,
-            y: ny * 120,
-            duration: 0.9,
-            ease: 'power2.out'
-          });
-        }
-
-        const speed = Math.min(28, (Math.abs(e.movementX) + Math.abs(e.movementY)) * 0.65);
-        if (speed > 2) {
-          isHoveringHero = true;
-          turbulenceEl.setAttribute('baseFrequency', `${(0.012 + Math.abs(nx) * 0.02).toFixed(4)} ${(0.03 + Math.abs(ny) * 0.04).toFixed(4)}`);
-          gsap.to(displacementEl, {
-            attr: { scale: speed },
-            duration: 0.25,
-            overwrite: 'auto',
-            onComplete: () => {
-              if (window.scrollY < 40 && isHoveringHero) {
-                gsap.to(displacementEl, { attr: { scale: 0 }, duration: 0.9, ease: 'power3.out' });
-              }
-            }
-          });
-        }
-      });
-    }
-
-    // Przypięta (PINNED) animacja Liquid Melt przy scrollowaniu Hero — 100% widoczna na ekranie!
-    if (heroSection && heroSplitInstance && heroSplitInstance.chars) {
-      const isMobile = window.innerWidth < 768;
-      const liquidState = { scale: 0, freqX: 0.008, freqY: 0.025, seed: 8 };
-
-      const heroLiquidTl = gsap.timeline({
-        scrollTrigger: {
-          id: 'liquid-hero-pin',
-          trigger: heroSection,
-          start: 'top top',
-          end: '+=125%',
-          pin: true,
-          scrub: 0.6,
-          anticipatePin: 1
-        }
-      });
-
-      // Przeciwbieżny ruch 3 gigantycznych wierszy napisu
-      heroLiquidTl
-        .to('.hero__row--1', { xPercent: isMobile ? -8 : -14, ease: 'none' }, 0)
-        .to('.hero__row--2', { xPercent: isMobile ? 10 : 18, ease: 'none' }, 0)
-        .to('.hero__row--3', { xPercent: isMobile ? -10 : -16, ease: 'none' }, 0)
-        .to('.hero__bottom-bar, .hero__kicker, .hero__scroll-cue', {
-          opacity: 0,
-          y: -25,
-          duration: 0.35,
-          ease: 'power1.in'
-        }, 0);
-
-      // Falowanie i topnienie filtra SVG (prawdziwy efekt cieczy)
-      if (displacementEl && turbulenceEl) {
-        heroLiquidTl.to(liquidState, {
-          scale: isMobile ? 55 : 115,
-          freqX: 0.028,
-          freqY: 0.085,
-          duration: 0.85,
-          ease: 'power2.in',
-          onUpdate: () => {
-            displacementEl.setAttribute('scale', liquidState.scale.toFixed(1));
-            turbulenceEl.setAttribute('baseFrequency', `${liquidState.freqX.toFixed(4)} ${liquidState.freqY.toFixed(4)}`);
-          }
-        }, 0.1);
-      }
-
-      // Rozpraszanie i parowanie pojedynczych liter po rozpuszczeniu
-      heroLiquidTl.to(heroSplitInstance.chars, {
-        y: () => gsap.utils.random(-140, 90),
-        x: () => gsap.utils.random(-110, 110),
-        rotation: () => gsap.utils.random(-35, 35),
-        scale: () => gsap.utils.random(0.6, 1.5),
-        filter: 'blur(12px)',
-        opacity: 0,
-        stagger: {
-          amount: 0.45,
-          from: 'random'
-        },
-        duration: 0.7,
-        ease: 'power2.in'
-      }, 0.3);
-    }
-
-    // Rozpływanie się nagłówków kolejnych sekcji
-    sectionSplitInstances.forEach((inst, idx) => {
-      if (!inst.chars || !inst.chars.length) return;
-      const parentHeading = inst.elements[0];
-
-      gsap.fromTo(inst.chars,
+    // Animacje wejścia elementów przy scrollowaniu (ScrollTrigger)
+    gsap.utils.toArray('.scroll-reveal').forEach((elem) => {
+      gsap.fromTo(elem, 
+        { opacity: 0, y: 40 },
         {
-          y: 48,
-          x: () => gsap.utils.random(-32, 32),
-          rotation: () => gsap.utils.random(-18, 18),
-          filter: 'blur(8px)',
-          opacity: 0
-        },
-        {
-          y: 0,
-          x: 0,
-          rotation: 0,
-          filter: 'blur(0px)',
           opacity: 1,
-          stagger: { amount: 0.35, from: 'start' },
+          y: 0,
+          duration: 0.9,
           ease: 'power3.out',
           scrollTrigger: {
-            id: `liquid-sec-in-${idx}`,
-            trigger: parentHeading,
-            start: 'top 92%',
-            end: 'top 54%',
-            scrub: 0.65
-          }
-        }
-      );
-
-      gsap.fromTo(inst.chars,
-        {
-          y: 0,
-          x: 0,
-          rotation: 0,
-          filter: 'blur(0px)',
-          opacity: 1
-        },
-        {
-          y: () => gsap.utils.random(-65, -20),
-          x: () => gsap.utils.random(-50, 50),
-          rotation: () => gsap.utils.random(-24, 24),
-          filter: 'blur(8px)',
-          opacity: 0,
-          stagger: { amount: 0.3, from: 'random' },
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            id: `liquid-sec-out-${idx}`,
-            trigger: parentHeading,
-            start: 'top 15%',
-            end: 'top -22%',
-            scrub: 0.75
+            trigger: elem,
+            start: 'top 85%',
+            toggleActions: 'play none none none'
           }
         }
       );
     });
+
+    // Efekt delikatnej paralaksy na zdjęciach
+    document.querySelectorAll('[data-parallax]').forEach((el) => {
+      const speed = parseFloat(el.getAttribute('data-parallax')) || 0.05;
+      gsap.to(el, {
+        y: () => window.innerHeight * speed,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
+    });
   }
 
-  function setupProductScrollDivergence() {
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+  function triggerHeroAnimations() {
+    gsap.from('.hero-reveal', {
+      opacity: 0,
+      y: 35,
+      stagger: 0.12,
+      duration: 1,
+      ease: 'power3.out'
+    });
+  }
 
-    ScrollTrigger.getAll()
-      .filter((st) => st.vars && st.vars.id && st.vars.id.startsWith('prod-card-'))
-      .forEach((st) => st.kill());
+  // ==========================================================================
+  // 3. NAWIGACJA I MOBILNE MENU
+  // ==========================================================================
+  function initNavigation() {
+    const mobileToggle = document.getElementById('mobileToggle');
+    const mainNav = document.getElementById('mainNav');
+    const header = document.getElementById('header');
 
-    const cards = gsap.utils.toArray('.product-card');
-    const isDesktop = window.innerWidth >= 1080;
-    const isTablet = window.innerWidth >= 640 && window.innerWidth < 1080;
-
-    cards.forEach((card, index) => {
-      let enterX = 0;
-      let enterY = 45;
-      let enterRot = 0;
-
-      if (isDesktop) {
-        const col = index % 3;
-        enterX = col === 0 ? -95 : col === 2 ? 95 : 0;
-        enterY = col === 1 ? 85 : 35;
-        enterRot = col === 0 ? -3.5 : col === 2 ? 3.5 : 0;
-      } else if (isTablet) {
-        const col = index % 2;
-        enterX = col === 0 ? -65 : 65;
-        enterRot = col === 0 ? -2.5 : 2.5;
+    // Sticky header background transition
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.style.backgroundColor = 'rgba(250, 248, 245, 0.95)';
+        header.style.boxShadow = '0 4px 20px rgba(28,27,26,0.04)';
       } else {
-        enterX = index % 2 === 0 ? -36 : 36;
-      }
-
-      gsap.fromTo(card,
-        {
-          x: enterX,
-          y: enterY,
-          rotation: enterRot,
-          opacity: 0.25
-        },
-        {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          opacity: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            id: `prod-card-in-${index}`,
-            trigger: card,
-            start: 'top 95%',
-            end: 'top 58%',
-            scrub: 0.75
-          }
-        }
-      );
-
-      gsap.fromTo(card,
-        {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          opacity: 1
-        },
-        {
-          x: enterX * 1.2,
-          y: isDesktop && index % 3 === 1 ? 70 : -40,
-          rotation: enterRot * 1.15,
-          opacity: 0.15,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            id: `prod-card-out-${index}`,
-            trigger: card,
-            start: 'bottom 35%',
-            end: 'bottom -20%',
-            scrub: 0.85
-          }
-        }
-      );
-    });
-  }
-
-  function setupScrollAnimations() {
-    if (typeof ScrollTrigger === 'undefined') return;
-
-    const isDesktop = window.innerWidth >= 960;
-
-    gsap.utils.toArray('.split-header').forEach((header) => {
-      const right = header.querySelector('.split-header__right');
-      if (!right) return;
-
-      gsap.fromTo(right,
-        { x: isDesktop ? 85 : 35, opacity: 0 },
-        {
-          x: 0,
-          opacity: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: header,
-            start: 'top 92%',
-            end: 'top 56%',
-            scrub: 0.7
-          }
-        }
-      );
-
-      gsap.fromTo(right,
-        { x: 0, opacity: 1 },
-        {
-          x: isDesktop ? 105 : 40,
-          opacity: 0.15,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: header,
-            start: 'top 18%',
-            end: 'top -24%',
-            scrub: 0.75
-          }
-        }
-      );
-    });
-
-    gsap.utils.toArray('.craft-card').forEach((card, index) => {
-      const dirX = isDesktop
-        ? (index === 0 ? -110 : index === 1 ? -40 : index === 2 ? 40 : 110)
-        : (index % 2 === 0 ? -45 : 45);
-      const dirY = index % 2 === 0 ? 70 : -55;
-      const rot = index < 2 ? -3 : 3;
-
-      gsap.fromTo(card,
-        {
-          x: dirX,
-          y: dirY,
-          rotation: rot,
-          opacity: 0.2
-        },
-        {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          opacity: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: '.craft__bento',
-            start: 'top 92%',
-            end: 'top 42%',
-            scrub: 0.75
-          }
-        }
-      );
-
-      gsap.fromTo(card,
-        {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          opacity: 1
-        },
-        {
-          x: dirX * 1.15,
-          y: index % 2 === 0 ? -65 : 65,
-          rotation: -rot,
-          opacity: 0.15,
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: '.craft__bento',
-            start: 'bottom 45%',
-            end: 'bottom -15%',
-            scrub: 0.85
-          }
-        }
-      );
-    });
-
-    const customInfo = document.querySelector('.custom__info');
-    const customForm = document.querySelector('.custom-form');
-    if (customInfo && customForm) {
-      gsap.fromTo(customInfo,
-        { x: isDesktop ? -110 : -35, rotation: isDesktop ? -2 : 0, opacity: 0.2 },
-        {
-          x: 0,
-          rotation: 0,
-          opacity: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: '.custom__wrapper',
-            start: 'top 92%',
-            end: 'top 45%',
-            scrub: 0.75
-          }
-        }
-      );
-
-      gsap.fromTo(customForm,
-        { x: isDesktop ? 110 : 35, rotation: isDesktop ? 2 : 0, opacity: 0.2 },
-        {
-          x: 0,
-          rotation: 0,
-          opacity: 1,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: '.custom__wrapper',
-            start: 'top 92%',
-            end: 'top 45%',
-            scrub: 0.75
-          }
-        }
-      );
-    }
-
-    setupLiquidTypography();
-    setupProductScrollDivergence();
-  }
-
-  function initAnimations() {
-    if (typeof gsap === 'undefined') return;
-    if (typeof ScrollTrigger !== 'undefined') {
-      gsap.registerPlugin(ScrollTrigger);
-    }
-
-    buildTextSplits();
-
-    const drawFrame = document.querySelector('.draw-frame');
-    const drawLoop = document.querySelector('.draw-loop');
-    const drawBar = document.querySelector('.draw-bar');
-
-    if (drawFrame && drawLoop && drawBar) {
-      const frameLen = 400;
-      const loopLen = 280;
-      const barLen = 24;
-      gsap.set(drawFrame, { strokeDasharray: frameLen, strokeDashoffset: frameLen });
-      gsap.set(drawLoop, { strokeDasharray: loopLen, strokeDashoffset: loopLen });
-      gsap.set(drawBar, { strokeDasharray: barLen, strokeDashoffset: barLen });
-    }
-
-    const heroChars = heroSplitInstance?.chars || [];
-
-    const introTl = gsap.timeline({
-      defaults: { ease: 'power3.out' },
-      onComplete: () => {
-        gsap.set('.hero-reveal', { clearProps: 'transform,opacity' });
-        setupScrollAnimations();
-        if (typeof ScrollTrigger !== 'undefined') {
-          ScrollTrigger.refresh();
-        }
+        header.style.backgroundColor = 'rgba(250, 248, 245, 0.8)';
+        header.style.boxShadow = 'none';
       }
     });
 
-    if (dom.preloader && dom.preloaderLine) {
-      introTl
-        .to('.draw-frame', { strokeDashoffset: 0, duration: 0.5, ease: 'power2.inOut' }, 0)
-        .to('.draw-loop', { strokeDashoffset: 0, duration: 0.6, ease: 'power2.out' }, 0.2)
-        .to('.draw-bar', { strokeDashoffset: 0, duration: 0.2, ease: 'power2.out' }, 0.55)
-        .to(dom.preloaderLine, { scaleX: 1, duration: 0.7, ease: 'power2.inOut' }, 0.12)
-        .to(dom.preloader, {
-          yPercent: -100,
-          duration: 0.8,
-          ease: 'power4.inOut',
-          onComplete: () => {
-            dom.preloader.style.display = 'none';
-          }
-        }, 0.85)
-        .from(heroChars, {
-          y: 65,
-          opacity: 0,
-          filter: 'blur(10px)',
-          rotation: () => gsap.utils.random(-16, 16),
-          duration: 0.95,
-          stagger: 0.024,
-          ease: 'power4.out'
-        }, '-=0.4')
-        .from('.hero-reveal', {
-          y: 26,
-          opacity: 0,
-          duration: 0.75,
-          stagger: 0.1
-        }, '-=0.6');
-    } else {
-      setupScrollAnimations();
-    }
-
-    let resizeTimer = null;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        buildTextSplits();
-        setupScrollAnimations();
-        if (typeof ScrollTrigger !== 'undefined') {
-          ScrollTrigger.refresh();
-        }
-      }, 280);
-    });
-  }
-
-  function initMagneticButtons() {
-    if (window.matchMedia('(hover: none)').matches) return;
-
-    document.querySelectorAll('.magnetic-btn').forEach((btn) => {
-      btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = (e.clientX - rect.left - rect.width / 2) * 0.22;
-        const y = (e.clientY - rect.top - rect.height / 2) * 0.22;
-        btn.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+    // Mobilne menu toggle
+    if (mobileToggle && mainNav) {
+      mobileToggle.addEventListener('click', () => {
+        const isOpen = mainNav.classList.toggle('is-open');
+        mobileToggle.setAttribute('aria-expanded', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
       });
 
-      btn.addEventListener('mouseleave', () => {
-        btn.style.transform = 'translate3d(0, 0, 0)';
+      // Zamknij menu po kliknięciu w link
+      mainNav.querySelectorAll('.nav__link').forEach(link => {
+        link.addEventListener('click', () => {
+          mainNav.classList.remove('is-open');
+          mobileToggle.setAttribute('aria-expanded', 'false');
+          document.body.style.overflow = '';
+          
+          // Obsługa szybkiego filtrowania z poziomu menu
+          const filterJump = link.getAttribute('data-filter-jump');
+          if (filterJump) {
+            setActiveFilter(filterJump);
+          }
+        });
+      });
+    }
+
+    // Filtry w sekcji sklepu
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const filter = e.target.getAttribute('data-filter');
+        setActiveFilter(filter);
       });
     });
   }
 
-  function renderProducts(category = 'all') {
-    if (!dom.productsGrid || typeof PRODUCTS_DATA === 'undefined') return;
+  function setActiveFilter(filterName) {
+    currentFilter = filterName;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      const isActive = b.getAttribute('data-filter') === filterName;
+      b.classList.toggle('is-active', isActive);
+      b.setAttribute('aria-selected', isActive);
+    });
+    renderProducts();
+  }
 
-    const filtered = category === 'all'
-      ? PRODUCTS_DATA
-      : PRODUCTS_DATA.filter((item) => item.category === category);
+  // ==========================================================================
+  // 4. RENDEROWANIE KATALOGU PRODUKTÓW
+  // ==========================================================================
+  function renderProducts() {
+    const grid = document.getElementById('productsGrid');
+    if (!grid) return;
 
-    dom.productsGrid.innerHTML = filtered.map((product) => {
-      const defaultVariant = product.variants[0];
-      const initialPrice = product.basePrice + defaultVariant.priceDelta;
+    const filtered = currentFilter === 'all' 
+      ? PRODUCTS_DATA 
+      : PRODUCTS_DATA.filter(p => p.category === currentFilter);
 
-      const optionsHtml = product.variants.map((variant, idx) => `
-        <option value="${variant.id}" data-delta="${variant.priceDelta}" ${idx === 0 ? 'selected' : ''}>
-          ${variant.label}
-        </option>
-      `).join('');
+    grid.innerHTML = '';
 
-      return `
-        <article class="product-card" data-product-id="${product.id}">
-          <div class="product-card__media" data-open-qv="${product.id}">
-            <span class="product-card__badge">${product.categoryLabel}</span>
-            <img
-              src="${product.imagePrimary}"
-              alt="${product.title}"
-              class="product-card__img product-card__img--primary"
-              loading="lazy"
-            >
-            <img
-              src="${product.imageDetail}"
-              alt="Detal papieru i wykończenia — ${product.title}"
-              class="product-card__img product-card__img--detail"
-              loading="lazy"
-            >
-            <button type="button" class="product-card__qv-btn" data-open-qv="${product.id}">
-              Szybki podgląd
+    filtered.forEach((product, idx) => {
+      const card = document.createElement('article');
+      card.className = 'product-card scroll-reveal';
+      card.style.animationDelay = `${idx * 0.1}s`;
+
+      card.innerHTML = `
+        <div class="product-card__image-wrap" data-product-id="${product.id}">
+          ${product.badge ? `<span class="product-card__badge">${product.badge}</span>` : ''}
+          <img src="${product.imageMain}" alt="${product.title}" class="product-card__image product-card__image--main" loading="lazy" />
+          <img src="${product.imageDetail}" alt="${product.title} - Detal" class="product-card__image product-card__image--detail" loading="lazy" />
+          <button class="product-card__quick-view" aria-label="Szybki podgląd">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="product-card__content">
+          <div>
+            <span class="product-card__category">${product.categoryLabel}</span>
+            <h3 class="product-card__title">${product.title}</h3>
+            <p class="product-card__subtitle">${product.subtitle}</p>
+          </div>
+          <div class="product-card__footer">
+            <span class="product-card__price">od ${product.basePrice.toFixed(2).replace('.', ',')} zł</span>
+            <button class="product-card__btn" data-product-id="${product.id}">
+              <span>Konfiguruj i wybierz</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
           </div>
-
-          <div class="product-card__body">
-            <p class="product-card__paper">${product.paperInfo}</p>
-            <h3 class="product-card__title">${product.title}</h3>
-
-            <label class="product-card__variant-label" for="select-${product.id}">Wybierz wariant</label>
-            <select id="select-${product.id}" class="product-card__select" data-variant-select="${product.id}">
-              ${optionsHtml}
-            </select>
-
-            <div class="product-card__footer">
-              <span class="product-card__price" data-price-display="${product.id}">
-                ${formatPrice(initialPrice)}
-              </span>
-              <button type="button" class="product-card__add-btn" data-add-to-cart="${product.id}">
-                Dodaj do koszyka
-              </button>
-            </div>
-          </div>
-        </article>
+        </div>
       `;
-    }).join('');
 
-    setupProductScrollDivergence();
-    if (typeof ScrollTrigger !== 'undefined') {
-      ScrollTrigger.refresh();
-    }
+      // Nasłuch kliknięcia w kartę / przycisk otwierający Quick View
+      card.querySelectorAll('.product-card__image-wrap, .product-card__btn').forEach(trigger => {
+        trigger.addEventListener('click', () => openQuickView(product.id));
+      });
+
+      grid.appendChild(card);
+    });
   }
 
-  function setCategoryFilter(category) {
-    activeCategory = category;
-    dom.filterButtons.forEach((btn) => {
-      const isMatch = btn.dataset.filter === category;
-      btn.classList.toggle('is-active', isMatch);
-      btn.setAttribute('aria-selected', String(isMatch));
+  // ==========================================================================
+  // 5. MODAL SZYBKIEGO PODGLĄDU I KONFIGURATOR WARIANTÓW
+  // ==========================================================================
+  function initQuickViewModal() {
+    const modal = document.getElementById('quickViewModal');
+    const closeBtn = document.getElementById('closeQuickView');
+    const qtyMinus = document.getElementById('qvQtyMinus');
+    const qtyPlus = document.getElementById('qvQtyPlus');
+    const qtyInput = document.getElementById('qvQtyInput');
+    const sizeSelect = document.getElementById('qvSizeSelect');
+    const paperSelect = document.getElementById('qvPaperSelect');
+    const addToCartBtn = document.getElementById('qvAddToCart');
+
+    if (!modal) return;
+
+    // Zamknięcie modala
+    closeBtn.addEventListener('click', closeQuickView);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeQuickView();
     });
-    renderProducts(category);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeQuickView();
+    });
+
+    // Zmiana wariantów / recalculate price
+    sizeSelect.addEventListener('change', (e) => {
+      selectedSizeIndex = parseInt(e.target.value, 10);
+      updateQuickViewPrice();
+    });
+
+    paperSelect.addEventListener('change', (e) => {
+      selectedPaperIndex = parseInt(e.target.value, 10);
+      updateQuickViewPrice();
+    });
+
+    // Sterowanie ilością z uwzględnieniem minQty
+    qtyMinus.addEventListener('click', () => {
+      if (!activeQuickViewProduct) return;
+      const step = activeQuickViewProduct.stepQty || 1;
+      const min = activeQuickViewProduct.minQty || 1;
+      if (currentQty - step >= min) {
+        currentQty -= step;
+        qtyInput.value = currentQty;
+        updateQuickViewPrice();
+      }
+    });
+
+    qtyPlus.addEventListener('click', () => {
+      if (!activeQuickViewProduct) return;
+      const step = activeQuickViewProduct.stepQty || 1;
+      currentQty += step;
+      qtyInput.value = currentQty;
+      updateQuickViewPrice();
+    });
+
+    // Dodanie skonfigurowanego produktu do koszyka
+    addToCartBtn.addEventListener('click', () => {
+      if (!activeQuickViewProduct) return;
+
+      const selectedSize = activeQuickViewProduct.variants.size[selectedSizeIndex];
+      const selectedPaper = activeQuickViewProduct.variants.paper[selectedPaperIndex];
+      const unitPrice = activeQuickViewProduct.basePrice + selectedSize.priceMod + selectedPaper.priceMod;
+
+      const cartItem = {
+        cartId: `${activeQuickViewProduct.id}-${selectedSizeIndex}-${selectedPaperIndex}`,
+        id: activeQuickViewProduct.id,
+        title: activeQuickViewProduct.title,
+        subtitle: `${selectedSize.label} / ${selectedPaper.label}`,
+        price: unitPrice,
+        quantity: currentQty,
+        image: activeQuickViewProduct.imageMain
+      };
+
+      addToCart(cartItem);
+      closeQuickView();
+      openCartDrawer();
+    });
   }
 
   function openQuickView(productId) {
-    const product = PRODUCTS_DATA.find((p) => p.id === productId);
-    if (!product || !dom.qvModal || !dom.qvContent) return;
+    const product = PRODUCTS_DATA.find(p => p.id === productId);
+    if (!product) return;
 
-    const defaultVariant = product.variants[0];
-    const initialPrice = product.basePrice + defaultVariant.priceDelta;
+    activeQuickViewProduct = product;
+    selectedSizeIndex = 0;
+    selectedPaperIndex = 0;
+    currentQty = product.minQty || 1;
 
-    const optionsHtml = product.variants.map((v, i) => `
-      <option value="${v.id}" ${i === 0 ? 'selected' : ''}>${v.label}</option>
+    // Wypełnij dane modala
+    document.getElementById('qvCategory').textContent = product.categoryLabel;
+    document.getElementById('qvTitle').textContent = product.title;
+    document.getElementById('qvSubtitle').textContent = product.subtitle;
+    document.getElementById('qvDescription').textContent = product.description;
+    document.getElementById('qvQtyInput').value = currentQty;
+
+    const mainImg = document.getElementById('qvMainImg');
+    mainImg.src = product.imageMain;
+    mainImg.alt = product.title;
+
+    // Miniaturki
+    const thumbMain = document.getElementById('qvThumbMain');
+    const thumbDetail = document.getElementById('qvThumbDetail');
+    thumbMain.querySelector('img').src = product.imageMain;
+    thumbDetail.querySelector('img').src = product.imageDetail;
+
+    thumbMain.onclick = () => {
+      mainImg.src = product.imageMain;
+      thumbMain.classList.add('is-active');
+      thumbDetail.classList.remove('is-active');
+    };
+    thumbDetail.onclick = () => {
+      mainImg.src = product.imageDetail;
+      thumbDetail.classList.add('is-active');
+      thumbMain.classList.remove('is-active');
+    };
+    thumbMain.classList.add('is-active');
+    thumbDetail.classList.remove('is-active');
+
+    // Specyfikacje
+    const specsList = document.getElementById('qvSpecs');
+    specsList.innerHTML = product.specs.map(spec => `<li>${spec}</li>`).join('');
+
+    // Select formatów
+    const sizeSelect = document.getElementById('qvSizeSelect');
+    sizeSelect.innerHTML = product.variants.size.map((s, i) => `
+      <option value="${i}">${s.label} ${s.priceMod > 0 ? `(+${s.priceMod.toFixed(2)} zł)` : ''}</option>
     `).join('');
 
-    dom.qvContent.innerHTML = `
-      <div>
-        <div class="qv-zoom-box" id="qv-zoom-box">
-          <img src="${product.imagePrimary}" alt="${product.title}" id="qv-main-img">
-          <span class="qv-zoom-hint">Najedź, aby powiększyć splot papieru</span>
-        </div>
-        <div class="qv-thumbs">
-          <button type="button" class="qv-thumb is-active" data-qv-src="${product.imagePrimary}" aria-label="Widok główny">
-            <img src="${product.imagePrimary}" alt="">
-          </button>
-          <button type="button" class="qv-thumb" data-qv-src="${product.imageDetail}" aria-label="Widok detalu">
-            <img src="${product.imageDetail}" alt="">
-          </button>
-        </div>
-      </div>
+    // Select papierów
+    const paperSelect = document.getElementById('qvPaperSelect');
+    paperSelect.innerHTML = product.variants.paper.map((p, i) => `
+      <option value="${i}">${p.label} ${p.priceMod > 0 ? `(+${p.priceMod.toFixed(2)} zł)` : ''}</option>
+    `).join('');
 
-      <div class="qv-details">
-        <p class="eyebrow">${product.categoryLabel}</p>
-        <h3 id="qv-title" class="qv-title">${product.title}</h3>
-        <p class="qv-price" id="qv-price">${formatPrice(initialPrice)}</p>
-        <p class="qv-desc">${product.description}</p>
-        <div class="qv-spec">
-          <strong>Podłoże i technika:</strong> ${product.paperInfo}
-        </div>
+    // Informacja o minimalnym nakładzie
+    const minNote = document.getElementById('qvMinNote');
+    if (product.minQty > 1) {
+      minNote.textContent = `Minimalne zamówienie dla tego produktu to ${product.minQty} szt. (krok: ${product.stepQty})`;
+      minNote.style.display = 'block';
+    } else {
+      minNote.style.display = 'none';
+    }
 
-        <label class="product-card__variant-label" for="qv-variant-select">Wariant / Nakład</label>
-        <select id="qv-variant-select" class="product-card__select">
-          ${optionsHtml}
-        </select>
+    updateQuickViewPrice();
 
-        <button type="button" class="btn btn--primary btn--full" id="qv-add-btn">
-          Dodaj do koszyka
-        </button>
-      </div>
-    `;
-
-    const zoomBox = document.getElementById('qv-zoom-box');
-    const mainImg = document.getElementById('qv-main-img');
-    const qvSelect = document.getElementById('qv-variant-select');
-    const qvPrice = document.getElementById('qv-price');
-    const qvAddBtn = document.getElementById('qv-add-btn');
-
-    zoomBox.addEventListener('mousemove', (e) => {
-      const rect = zoomBox.getBoundingClientRect();
-      const xPercent = ((e.clientX - rect.left) / rect.width) * 100;
-      const yPercent = ((e.clientY - rect.top) / rect.height) * 100;
-      mainImg.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-      mainImg.style.transform = 'scale(2)';
-    });
-
-    zoomBox.addEventListener('mouseleave', () => {
-      mainImg.style.transform = 'scale(1)';
-      mainImg.style.transformOrigin = 'center center';
-    });
-
-    dom.qvContent.querySelectorAll('.qv-thumb').forEach((thumb) => {
-      thumb.addEventListener('click', () => {
-        dom.qvContent.querySelectorAll('.qv-thumb').forEach((t) => t.classList.remove('is-active'));
-        thumb.classList.add('is-active');
-        mainImg.src = thumb.dataset.qvSrc;
-      });
-    });
-
-    qvSelect.addEventListener('change', () => {
-      const selectedVariant = product.variants.find((v) => v.id === qvSelect.value);
-      if (selectedVariant) {
-        qvPrice.textContent = formatPrice(product.basePrice + selectedVariant.priceDelta);
-      }
-    });
-
-    qvAddBtn.addEventListener('click', () => {
-      addToCart(product.id, qvSelect.value);
-      closeQuickView();
-    });
-
-    dom.qvModal.classList.add('is-open');
-    dom.qvModal.setAttribute('aria-hidden', 'false');
-    if (lenisInstance) lenisInstance.stop();
+    const modal = document.getElementById('quickViewModal');
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
   }
 
   function closeQuickView() {
-    if (!dom.qvModal) return;
-    dom.qvModal.classList.remove('is-open');
-    dom.qvModal.setAttribute('aria-hidden', 'true');
-    if (lenisInstance) lenisInstance.start();
+    const modal = document.getElementById('quickViewModal');
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    activeQuickViewProduct = null;
   }
 
-  function addToCart(productId, variantId) {
-    const product = PRODUCTS_DATA.find((p) => p.id === productId);
-    if (!product) return;
+  function updateQuickViewPrice() {
+    if (!activeQuickViewProduct) return;
+    const sizeMod = activeQuickViewProduct.variants.size[selectedSizeIndex].priceMod;
+    const paperMod = activeQuickViewProduct.variants.paper[selectedPaperIndex].priceMod;
+    const unitPrice = activeQuickViewProduct.basePrice + sizeMod + paperMod;
+    const totalPrice = unitPrice * currentQty;
 
-    const variant = product.variants.find((v) => v.id === variantId) || product.variants[0];
-    const unitPrice = product.basePrice + variant.priceDelta;
-    const cartItemKey = `${product.id}__${variant.id}`;
+    document.getElementById('qvPrice').textContent = `${totalPrice.toFixed(2).replace('.', ',')} zł`;
+  }
 
-    const existing = cart.find((item) => item.key === cartItemKey);
-    if (existing) {
-      existing.quantity += 1;
+  // ==========================================================================
+  // 6. ZARZĄDZANIE KOSZYKIEM (LOCALSTORAGE) I SZUFLADĄ
+  // ==========================================================================
+  function initCart() {
+    const cartTrigger = document.getElementById('cartTrigger');
+    const closeCartDrawerBtn = document.getElementById('closeCartDrawer');
+    const cartBackdrop = document.getElementById('cartBackdrop');
+
+    if (cartTrigger) {
+      cartTrigger.addEventListener('click', openCartDrawer);
+    }
+    if (closeCartDrawerBtn) {
+      closeCartDrawerBtn.addEventListener('click', closeCartDrawer);
+    }
+    if (cartBackdrop) {
+      cartBackdrop.addEventListener('click', closeCartDrawer);
+    }
+  }
+  initCart();
+
+  function openCartDrawer() {
+    document.getElementById('cartDrawer').classList.add('is-open');
+    document.getElementById('cartBackdrop').classList.add('is-open');
+    document.getElementById('cartDrawer').setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCartDrawer() {
+    document.getElementById('cartDrawer').classList.remove('is-open');
+    document.getElementById('cartBackdrop').classList.remove('is-open');
+    document.getElementById('cartDrawer').setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function addToCart(newItem) {
+    const existingIndex = cart.findIndex(item => item.cartId === newItem.cartId);
+    if (existingIndex > -1) {
+      cart[existingIndex].quantity += newItem.quantity;
     } else {
-      cart.push({
-        key: cartItemKey,
-        productId: product.id,
-        variantId: variant.id,
-        title: product.title,
-        variantLabel: variant.label,
-        unitPrice,
-        image: product.imagePrimary,
-        quantity: 1
-      });
+      cart.push(newItem);
     }
 
     saveCart();
-    renderCart();
-    openCartDrawer();
-    showToast(`Dodano do koszyka: ${product.title}`);
+    updateCartUI();
+    showToast(`Dodano do koszyka: ${newItem.title}`);
   }
 
-  function updateCartQuantity(key, delta) {
-    const item = cart.find((entry) => entry.key === key);
+  function removeFromCart(cartId) {
+    cart = cart.filter(item => item.cartId !== cartId);
+    saveCart();
+    updateCartUI();
+  }
+
+  function updateItemQuantity(cartId, delta) {
+    const item = cart.find(i => i.cartId === cartId);
     if (!item) return;
 
     item.quantity += delta;
     if (item.quantity <= 0) {
-      cart = cart.filter((entry) => entry.key !== key);
+      removeFromCart(cartId);
+    } else {
+      saveCart();
+      updateCartUI();
     }
-
-    saveCart();
-    renderCart();
   }
 
-  function removeFromCart(key) {
-    cart = cart.filter((entry) => entry.key !== key);
-    saveCart();
-    renderCart();
+  function saveCart() {
+    localStorage.setItem('pracownia_cart', JSON.stringify(cart));
   }
 
-  function renderCart() {
-    const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    if (dom.cartCount) {
-      dom.cartCount.textContent = String(totalCount);
-    }
+  function updateCartUI() {
+    const badge = document.getElementById('cartBadge');
+    const container = document.getElementById('cartItemsContainer');
+    const subtotalEl = document.getElementById('cartSubtotal');
+    const shippingEl = document.getElementById('cartShipping');
+    const totalEl = document.getElementById('cartTotal');
+    const shippingText = document.getElementById('shippingText');
+    const shippingFill = document.getElementById('shippingFill');
 
-    if (!dom.cartItemsContainer || !dom.cartFooter) return;
+    // Liczba produktów w badge
+    const totalItemsCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+    badge.textContent = totalItemsCount;
 
     if (cart.length === 0) {
-      dom.cartItemsContainer.innerHTML = `
-        <div class="cart-empty">
-          <p>Twój koszyk jest obecnie pusty.</p>
-          <p style="font-size: 0.85rem; margin-top: 0.5rem;">Odkryj autorskie wydruki na papierze bawełnianym oraz papeterię ślubną z Pracowni Graficznej Asi.</p>
+      container.innerHTML = `
+        <div class="cart-empty-state">
+          <p>Twój koszyk jest aktualnie pusty.</p>
+          <a href="#kolekcja" class="btn btn--primary" onclick="document.getElementById('closeCartDrawer').click()">Wybierz wydruki i papeterię</a>
         </div>
       `;
-      dom.cartFooter.style.display = 'none';
+      subtotalEl.textContent = '0,00 zł';
+      shippingEl.textContent = '0,00 zł';
+      totalEl.textContent = '0,00 zł';
+      shippingText.innerHTML = `Do darmowej dostawy brakuje <strong>${FREE_SHIPPING_THRESHOLD.toFixed(2).replace('.', ',')} zł</strong>`;
+      shippingFill.style.width = '0%';
       return;
     }
 
-    dom.cartFooter.style.display = 'block';
-
-    dom.cartItemsContainer.innerHTML = cart.map((item) => `
+    // Renderowanie elementów koszyka
+    container.innerHTML = cart.map(item => `
       <div class="cart-item">
-        <img src="${item.image}" alt="${item.title}" class="cart-item__img">
+        <img src="${item.image}" alt="${item.title}" class="cart-item__img" />
         <div class="cart-item__info">
-          <h4 class="cart-item__title">${item.title}</h4>
-          <p class="cart-item__variant">${item.variantLabel}</p>
+          <h5>${item.title}</h5>
+          <p class="cart-item__meta">${item.subtitle}</p>
+          <span class="cart-item__price">${(item.price * item.quantity).toFixed(2).replace('.', ',')} zł</span>
           <div class="cart-item__controls">
-            <div>
-              <div class="qty-stepper">
-                <button type="button" data-qty-minus="${item.key}" aria-label="Zmniejsz ilość">&minus;</button>
-                <span>${item.quantity}</span>
-                <button type="button" data-qty-plus="${item.key}" aria-label="Zwiększ ilość">&plus;</button>
-              </div>
-              <button type="button" class="cart-item__remove" data-remove-item="${item.key}">Usuń</button>
-            </div>
-            <span class="cart-item__price">${formatPrice(item.unitPrice * item.quantity)}</span>
+            <button class="cart-item__qty-btn" onclick="window.updateCartQty('${item.cartId}', -1)" aria-label="Zmniejsz ilość">&minus;</button>
+            <span>${item.quantity} szt.</span>
+            <button class="cart-item__qty-btn" onclick="window.updateCartQty('${item.cartId}', 1)" aria-label="Zwiększ ilość">+</button>
           </div>
         </div>
+        <button class="cart-item__remove" onclick="window.removeCartItem('${item.cartId}')" aria-label="Usuń pozycję">&times;</button>
       </div>
     `).join('');
 
-    const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+    // Obliczenia finansowe
+    const subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD || subtotal === 0 ? 0 : BASE_SHIPPING_COST;
     const total = subtotal + shipping;
 
-    dom.cartSubtotal.textContent = formatPrice(subtotal);
-    dom.cartShipping.textContent = shipping === 0 ? 'Bezpłatnie' : formatPrice(shipping);
-    dom.cartTotal.textContent = formatPrice(total);
+    subtotalEl.textContent = `${subtotal.toFixed(2).replace('.', ',')} zł`;
+    shippingEl.textContent = shipping === 0 ? '0,00 zł (Darmowa dostawa)' : `${shipping.toFixed(2).replace('.', ',')} zł`;
+    totalEl.textContent = `${total.toFixed(2).replace('.', ',')} zł`;
 
-    if (shipping === 0) {
-      dom.freeShippingNote.textContent = 'Przysługuje Ci darmowa dostawa kurierska!';
+    // Pasek postępu darmowej dostawy
+    const diff = FREE_SHIPPING_THRESHOLD - subtotal;
+    const progressPercent = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
+    shippingFill.style.width = `${progressPercent}%`;
+
+    if (diff > 0) {
+      shippingText.innerHTML = `Do darmowej dostawy brakuje <strong>${diff.toFixed(2).replace('.', ',')} zł</strong>`;
     } else {
-      const missing = FREE_SHIPPING_THRESHOLD - subtotal;
-      dom.freeShippingNote.textContent = `Brakuje ${formatPrice(missing)} do darmowej dostawy.`;
+      shippingText.innerHTML = `🎉 Korzystasz z <strong>darmowej dostawy kurierem!</strong>`;
     }
   }
 
-  function openCartDrawer() {
-    if (!dom.cartDrawer) return;
-    dom.cartDrawer.classList.add('is-open');
-    dom.cartDrawer.setAttribute('aria-hidden', 'false');
-    if (lenisInstance) lenisInstance.stop();
-  }
+  // Globalne handlery dla inline onclick w elementach koszyka
+  window.updateCartQty = (cartId, delta) => updateItemQuantity(cartId, delta);
+  window.removeCartItem = (cartId) => removeFromCart(cartId);
 
-  function closeCartDrawer() {
-    if (!dom.cartDrawer) return;
-    dom.cartDrawer.classList.remove('is-open');
-    dom.cartDrawer.setAttribute('aria-hidden', 'true');
-    if (lenisInstance) lenisInstance.start();
-  }
+  // ==========================================================================
+  // 7. INTEGRACJA PŁATNOŚCI STRIPE CHECKOUT
+  // ==========================================================================
+  function initStripeCheckout() {
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (!checkoutBtn) return;
 
-  async function initiateStripeCheckout() {
-    if (cart.length === 0 || !dom.checkoutBtn) return;
-
-    const originalLabel = dom.checkoutBtn.textContent;
-    dom.checkoutBtn.disabled = true;
-    dom.checkoutBtn.textContent = 'Łączenie ze Stripe Checkout...';
-
-    const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-    const shippingAmount = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-
-    const checkoutPayload = {
-      currency: STRIPE_CONFIG.currency,
-      payment_method_types: STRIPE_CONFIG.paymentMethodTypes,
-      line_items: cart.map((item) => ({
-        price_data: {
-          currency: STRIPE_CONFIG.currency,
-          product_data: {
-            name: item.title,
-            description: item.variantLabel,
-            images: [item.image]
-          },
-          unit_amount: Math.round(item.unitPrice * 100)
-        },
-        quantity: item.quantity
-      })),
-      shipping_amount: Math.round(shippingAmount * 100),
-      success_url: `${window.location.origin}/dziekujemy?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${window.location.origin}/#kolekcja`
-    };
-
-    try {
-      const response = await fetch(STRIPE_CONFIG.checkoutEndpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(checkoutPayload)
-      });
-
-      if (!response.ok) {
-        throw new Error('Brak aktywnego backendu płatności w trybie podglądu.');
-      }
-
-      const session = await response.json();
-      if (session.url) {
-        window.location.href = session.url;
-        return;
-      }
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      showToast('Tryb demonstracyjny: ładunek sesji Stripe (BLIK/Karta) gotowy do wysłania.');
-    } finally {
-      dom.checkoutBtn.disabled = false;
-      dom.checkoutBtn.textContent = originalLabel;
-    }
-  }
-
-  function closeMobileMenu() {
-    if (!dom.mobileMenuBtn || !dom.mobileNav) return;
-    dom.mobileMenuBtn.setAttribute('aria-expanded', 'false');
-    dom.mobileNav.classList.remove('is-open');
-    dom.mobileNav.setAttribute('aria-hidden', 'true');
-  }
-
-  function bindEvents() {
-    dom.filterButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        setCategoryFilter(btn.dataset.filter);
-      });
-    });
-
-    dom.navFilterLinks.forEach((link) => {
-      link.addEventListener('click', () => {
-        const filterVal = link.dataset.filterLink;
-        if (filterVal) setCategoryFilter(filterVal);
-        closeMobileMenu();
-      });
-    });
-
-    if (dom.productsGrid) {
-      dom.productsGrid.addEventListener('change', (e) => {
-        const select = e.target.closest('[data-variant-select]');
-        if (!select) return;
-
-        const productId = select.dataset.variantSelect;
-        const product = PRODUCTS_DATA.find((p) => p.id === productId);
-        const variant = product?.variants.find((v) => v.id === select.value);
-        const priceEl = dom.productsGrid.querySelector(`[data-price-display="${productId}"]`);
-
-        if (product && variant && priceEl) {
-          priceEl.textContent = formatPrice(product.basePrice + variant.priceDelta);
-        }
-      });
-
-      dom.productsGrid.addEventListener('click', (e) => {
-        const addBtn = e.target.closest('[data-add-to-cart]');
-        if (addBtn) {
-          const productId = addBtn.dataset.addToCart;
-          const select = dom.productsGrid.querySelector(`[data-variant-select="${productId}"]`);
-          addToCart(productId, select ? select.value : null);
-          return;
-        }
-
-        const qvTrigger = e.target.closest('[data-open-qv]');
-        if (qvTrigger) {
-          openQuickView(qvTrigger.dataset.openQv);
-        }
-      });
-    }
-
-    if (dom.qvModal) {
-      dom.qvModal.addEventListener('click', (e) => {
-        if (e.target.hasAttribute('data-close-modal')) {
-          closeQuickView();
-        }
-      });
-    }
-
-    dom.cartOpenBtn?.addEventListener('click', openCartDrawer);
-    dom.cartCloseBtn?.addEventListener('click', closeCartDrawer);
-    dom.cartBackdrop?.addEventListener('click', closeCartDrawer);
-
-    dom.cartItemsContainer?.addEventListener('click', (e) => {
-      const minusBtn = e.target.closest('[data-qty-minus]');
-      if (minusBtn) {
-        updateCartQuantity(minusBtn.dataset.qtyMinus, -1);
+    checkoutBtn.addEventListener('click', () => {
+      if (cart.length === 0) {
+        alert('Twój koszyk jest pusty.');
         return;
       }
 
-      const plusBtn = e.target.closest('[data-qty-plus]');
-      if (plusBtn) {
-        updateCartQuantity(plusBtn.dataset.qtyPlus, 1);
-        return;
-      }
+      // ----------------------------------------------------------------------
+      // INSTRUKCJA INTEGRACJI ZE STRIPE CHECKOUT:
+      // ----------------------------------------------------------------------
+      // 1. W środowisku produkcyjnym koszyk należy przesłać do backendu (Node.js/PHP),
+      //    gdzie tworzona jest sesja Stripe Checkout za pomocą Stripe API:
+      //    const session = await stripe.checkout.sessions.create({
+      //      payment_method_types: ['card', 'blik', 'p24'],
+      //      line_items: cart.map(item => ({
+      //        price_data: {
+      //          currency: 'pln',
+      //          product_data: { name: item.title, description: item.subtitle },
+      //          unit_amount: Math.round(item.price * 100),
+      //        },
+      //        quantity: item.quantity,
+      //      })),
+      //      mode: 'payment',
+      //      success_url: 'https://twojadomena.pl/sukces?session_id={CHECKOUT_SESSION_ID}',
+      //      cancel_url: 'https://twojadomena.pl/koszyk',
+      //    });
+      // 2. Następnie następuje przekierowanie klienta:
+      //    window.location.href = session.url;
+      // ----------------------------------------------------------------------
 
-      const removeBtn = e.target.closest('[data-remove-item]');
-      if (removeBtn) {
-        removeFromCart(removeBtn.dataset.removeItem);
-      }
+      checkoutBtn.textContent = 'Przygotowywanie bezpiecznej sesji Stripe...';
+      checkoutBtn.disabled = true;
+
+      setTimeout(() => {
+        alert(`[Demo Stripe Checkout]\n\nPrzekierowujemy do bramki płatności (BLIK, Karta, Przelewy24).\nSuma zamówienia: ${document.getElementById('cartTotal').textContent}\n\nAby włączyć prawdziwe płatności, podłącz klucz API Stripe w pliku app.js.`);
+        checkoutBtn.textContent = 'Przejdź do płatności (BLIK / Karta)';
+        checkoutBtn.disabled = false;
+      }, 1200);
     });
+  }
 
-    dom.checkoutBtn?.addEventListener('click', initiateStripeCheckout);
+  // ==========================================================================
+  // 8. FORMULARZ ZAMÓWIENIA INDYWIDUALNEGO
+  // ==========================================================================
+  function initCustomOrderForm() {
+    const form = document.getElementById('customOrderForm');
+    const feedback = document.getElementById('customFormFeedback');
 
-    dom.mobileMenuBtn?.addEventListener('click', () => {
-      const expanded = dom.mobileMenuBtn.getAttribute('aria-expanded') === 'true';
-      dom.mobileMenuBtn.setAttribute('aria-expanded', String(!expanded));
-      dom.mobileNav.classList.toggle('is-open', !expanded);
-      dom.mobileNav.setAttribute('aria-hidden', String(expanded));
-      if (lenisInstance) {
-        if (!expanded) lenisInstance.stop();
-        else lenisInstance.start();
-      }
-    });
+    if (!form) return;
 
-    dom.quoteForm?.addEventListener('submit', (e) => {
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const formData = new FormData(dom.quoteForm);
-      const name = String(formData.get('name') || '').trim();
-      const email = String(formData.get('email') || '').trim();
-      const details = String(formData.get('details') || '').trim();
+      const name = document.getElementById('clientName').value.trim();
+      const email = document.getElementById('clientEmail').value.trim();
+      const details = document.getElementById('projectDetails').value.trim();
 
-      if (!name || !email || !email.includes('@') || !details) {
-        dom.quoteFeedback.classList.add('is-error');
-        dom.quoteFeedback.textContent = 'Uzupełnij imię, poprawny adres e-mail oraz opis projektu.';
+      if (!name || !email || !details) {
+        feedback.style.color = '#E06D53';
+        feedback.textContent = 'Proszę wypełnić wszystkie wymagane pola oznaczone gwiazdką.';
         return;
       }
 
-      dom.quoteFeedback.classList.remove('is-error');
-      dom.quoteFeedback.textContent = `Dziękujemy, ${name}. Asia przygotuje indywidualną wycenę i dobór papierów w ciągu 24 godzin.`;
-      dom.quoteForm.reset();
+      // Symulacja wysyłki zapytania o wycenę
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span>Wysyłanie zapytania...</span>';
+      submitBtn.disabled = true;
+
+      setTimeout(() => {
+        feedback.style.color = '#A3D9A5';
+        feedback.textContent = 'Dziękujemy! Zapytanie dotarło do pracowni. Odpiszemy w ciągu 24 godzin.';
+        form.reset();
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }, 1000);
     });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeQuickView();
-        closeCartDrawer();
-        closeMobileMenu();
-      }
-    });
   }
 
-  function init() {
-    renderProducts(activeCategory);
-    renderCart();
-    bindEvents();
-    initSmoothScroll();
-    initAnimations();
-    initMagneticButtons();
-  }
+  // ==========================================================================
+  // 9. POMOCNICZY SYSTEM POWIADOMIEN (TOAST)
+  // ==========================================================================
+  function showToast(message) {
+    let toast = document.getElementById('toastNotification');
+    if (!toast) return;
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+    toast.textContent = message;
+    toast.classList.add('is-visible');
+
+    setTimeout(() => {
+      toast.classList.remove('is-visible');
+    }, 3200);
   }
-})();
+});
