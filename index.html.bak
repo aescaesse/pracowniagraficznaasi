@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Autorska pracownia graficzna i introligatorska. Wydruki artystyczne giclée, papeteria ślubna ze złoceniem oraz precyzyjne detale z plotera.">
-  <title>ATELIER PAPIERU — Pracownia Graficzna & Poligrafia Artystyczna</title>
+  <meta name="description" content="Pracownia Graficzna Asi — autorskie wydruki artystyczne giclée, papeteria ślubna ze złoceniem oraz precyzyjne detale z plotera.">
+  <title>PRACOWNIA GRAFICZNA ASI — Poligrafia Artystyczna &amp; Papeteria</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,16 +16,16 @@
 
   <div class="preloader" aria-hidden="true">
     <div class="preloader__inner">
-      <span class="preloader__brand">ATELIER PAPIERU</span>
+      <span class="preloader__brand">PRACOWNIA GRAFICZNA ASI</span>
       <div class="preloader__line"></div>
     </div>
   </div>
 
   <header class="header" id="header">
     <div class="container header__inner">
-      <a href="#" class="logo" aria-label="Strona główna Atelier Papieru">
-        <span class="logo__mark">AP</span>
-        <span class="logo__text">ATELIER PAPIERU</span>
+      <a href="#" class="logo" aria-label="Strona główna Pracownia Graficzna Asi">
+        <span class="logo__mark">PGA</span>
+        <span class="logo__text">PRACOWNIA GRAFICZNA ASI</span>
       </a>
 
       <nav class="nav" aria-label="Nawigacja główna">
@@ -63,12 +63,12 @@
     <section class="hero">
       <div class="container hero__grid">
         <div class="hero__content">
-          <p class="eyebrow hero-reveal">Pracownia Graficzna &amp; Poligrafia Butikowa</p>
+          <p class="eyebrow hero-reveal">Pracownia Graficzna Asi &amp; Poligrafia Butikowa</p>
           <h1 class="hero__title hero-reveal">
             Sztuka zamknięta w <em>bawełnianym</em> splocie papieru.
           </h1>
           <p class="hero__subtitle hero-reveal">
-            Tworzymy autorskie plakaty kolekcjonerskie, ręcznie złoconą papeterię ślubną oraz precyzyjne detale wycinane ploterem. Każdy egzemplarz powstaje w krótkich seriach z poszanowaniem tradycyjnego rzemiosła.
+            W Pracowni Graficznej Asi tworzymy autorskie plakaty kolekcjonerskie, ręcznie złoconą papeterię ślubną oraz precyzyjne detale wycinane ploterem. Każdy egzemplarz powstaje w krótkich seriach z poszanowaniem tradycyjnego rzemiosła.
           </p>
           <div class="hero__cta-group hero-reveal">
             <a href="#kolekcja" class="btn btn--primary magnetic-btn">Odkryj kolekcję</a>
@@ -185,7 +185,7 @@
             <p class="eyebrow">Zamówienia Indywidualne</p>
             <h2 class="section-title">Zaprojektujmy coś unikatowego</h2>
             <p class="custom__desc">
-              Planujesz uroczystość i marzysz o spójnej oprawie papeteryjnej? A może potrzebujesz limitowanej serii etykiet lub plakatów dla swojej marki? Opisz krótko swoją wizję, a przygotujemy kosztorys wraz z propozycją papierów w ciągu 24 godzin.
+              Planujesz uroczystość i marzysz o spójnej oprawie papeteryjnej? A może potrzebujesz limitowanej serii etykiet lub plakatów dla swojej marki? Opisz krótko swoją wizję, a Asia przygotuje kosztorys wraz z propozycją papierów w ciągu 24 godzin.
             </p>
             <ul class="custom__perks">
               <li>Bezpłatny zestaw próbek papierów do każdego zlecenia</li>
@@ -238,7 +238,7 @@
   <footer class="footer">
     <div class="container footer__grid">
       <div class="footer__brand">
-        <span class="logo__text">ATELIER PAPIERU</span>
+        <span class="logo__text">PRACOWNIA GRAFICZNA ASI</span>
         <p class="footer__tagline">Autorska pracownia projektowania graficznego i szlachetnej poligrafii. Wysyłka bezpieczna na terenie całej Polski i UE.</p>
       </div>
       <div class="footer__col">
@@ -254,12 +254,12 @@
         <ul class="footer__links">
           <li><a href="#pracownia">Rodzaje papierów</a></li>
           <li><a href="#wycena">Zamówienia indywidualne</a></li>
-          <li><a href="mailto:kontakt@atelierpapieru.pl">kontakt@atelierpapieru.pl</a></li>
+          <li><a href="mailto:kontakt@pracowniagraficznaasi.pl">kontakt@pracowniagraficznaasi.pl</a></li>
         </ul>
       </div>
     </div>
     <div class="container footer__bottom">
-      <p>&copy; 2026 ATELIER PAPIERU. Wszelkie prawa zastrzeżone.</p>
+      <p>&copy; 2026 PRACOWNIA GRAFICZNA ASI. Wszelkie prawa zastrzeżone.</p>
       <p>Płatności obsługuje Stripe (BLIK, Karty, Apple Pay)</p>
     </div>
   </footer>

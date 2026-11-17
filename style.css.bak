@@ -1,4 +1,3 @@
-
 :root {
   --bg-primary: #FAF8F5;
   --bg-secondary: #F2EEE7;
@@ -40,7 +39,6 @@
   --shadow-modal: 0 30px 70px -15px rgba(28, 27, 26, 0.22);
 }
 
-
 *,
 *::before,
 *::after {
@@ -51,7 +49,7 @@
 
 html {
   font-size: 16px;
-  scroll-behavior: auto; 
+  scroll-behavior: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -231,12 +229,14 @@ ul {
   align-items: center;
   justify-content: space-between;
   gap: 1.5rem;
+  will-change: transform, opacity;
 }
 
 .logo {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
+  will-change: transform, opacity;
 }
 
 .logo__mark {
@@ -260,6 +260,7 @@ ul {
 
 .nav {
   display: none;
+  will-change: transform, opacity;
 }
 
 @media (min-width: 960px) {
@@ -311,6 +312,7 @@ ul {
   display: flex;
   align-items: center;
   gap: 1rem;
+  will-change: transform, opacity;
 }
 
 .cart-trigger {
@@ -440,6 +442,16 @@ ul {
   color: var(--accent-terracotta);
 }
 
+.split-char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+.split-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
 .hero__subtitle {
   max-width: 52ch;
   color: var(--text-secondary);
@@ -500,7 +512,6 @@ ul {
   will-change: transform;
 }
 
-
 .image-reveal {
   clip-path: inset(0 0 0 0);
 }
@@ -553,7 +564,6 @@ ul {
   color: var(--bg-primary);
 }
 
-
 .products-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -571,7 +581,6 @@ ul {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-
 
 .product-card {
   display: flex;
@@ -667,7 +676,6 @@ ul {
   color: var(--bg-primary);
 }
 
-
 @media (hover: none) {
   .product-card__qv-btn {
     opacity: 0.94;
@@ -756,11 +764,11 @@ ul {
   background-color: var(--accent-terracotta);
 }
 
-
 .craft-section {
   padding-block: clamp(4.5rem, 8vw, 7.5rem);
   background-color: var(--bg-secondary);
   border-block: 1px solid var(--border-subtle);
+  overflow: hidden;
 }
 
 .craft__grid {
@@ -818,6 +826,7 @@ ul {
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
+  will-change: transform, opacity;
 }
 
 .craft-card__num {
@@ -864,6 +873,7 @@ ul {
   border: 1px solid var(--border-subtle);
   padding: clamp(1.75rem, 4.5vw, 4rem);
   border-radius: var(--radius-md);
+  will-change: clip-path, transform;
 }
 
 @media (min-width: 960px) {
@@ -961,7 +971,6 @@ ul {
 .form-feedback.is-error {
   color: var(--accent-terracotta);
 }
-
 
 .footer {
   background-color: var(--text-primary);
@@ -1189,7 +1198,6 @@ ul {
   font-size: var(--fs-xs);
   margin-bottom: 1.5rem;
 }
-
 
 .cart-drawer {
   position: fixed;
@@ -1420,27 +1428,4 @@ ul {
   .preloader {
     display: none;
   }
-}
-.header__inner {
-  will-change: transform, opacity;
-}
-
-.logo,
-.nav,
-.header__actions {
-  will-change: transform, opacity;
-}
-
-.split-char {
-  display: inline-block;
-  will-change: transform, opacity;
-}
-
-.split-word {
-  display: inline-block;
-  white-space: nowrap;
-}
-
-.custom__wrapper {
-  will-change: clip-path, transform;
 }

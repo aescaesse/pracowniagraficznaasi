@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'atelier_papieru_cart_v1';
+  const STORAGE_KEY = 'pracownia_graficzna_asi_cart_v1';
   const SHIPPING_COST = 18;
   const FREE_SHIPPING_THRESHOLD = 350;
   const STRIPE_CONFIG = {
@@ -108,7 +108,7 @@
         if (targetEl) {
           e.preventDefault();
           closeMobileMenu();
-          lenisInstance.scrollTo(targetEl, { offset: -76 });
+          lenisInstance.scrollTo(targetEl, { offset: -74 });
         }
       });
     });
@@ -169,8 +169,8 @@
         .to(actionsEl, { x: 48, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
         .to(navEl, { y: -18, opacity: 0, duration: 0.35, ease: 'power2.inOut' }, 0)
         .to(headerEl, {
-          backgroundColor: 'rgba(250, 248, 245, 0)',
-          borderBottomColor: 'rgba(28, 27, 26, 0)',
+          backgroundColor: 'rgba(234, 234, 234, 0)',
+          borderBottomColor: 'rgba(20, 20, 20, 0)',
           backdropFilter: 'blur(0px)',
           duration: 0.4,
           ease: 'power2.out'
@@ -222,20 +222,20 @@
       );
     }
 
-    gsap.fromTo('.hero__subtitle, .hero__cta-group',
+    gsap.fromTo('.bento-card--statement',
       {
         y: 0,
         opacity: 1
       },
       {
-        y: -35,
-        opacity: 0,
+        y: -25,
+        opacity: 0.15,
         ease: 'none',
         immediateRender: false,
         scrollTrigger: {
           trigger: '.hero',
-          start: 'top top',
-          end: '65% top',
+          start: '30% top',
+          end: 'bottom top',
           scrub: 0.6
         }
       }
@@ -259,19 +259,19 @@
       const isEven = index % 2 === 1;
       gsap.fromTo(card,
         {
-          x: isEven ? 34 : -34,
+          y: isEven ? 40 : 20,
           rotation: isEven ? 1.5 : -1.5,
-          opacity: 0.35
+          opacity: 0.45
         },
         {
-          x: 0,
+          y: 0,
           rotation: 0,
           opacity: 1,
           ease: 'power2.out',
           scrollTrigger: {
             trigger: card,
             start: 'top 92%',
-            end: 'top 55%',
+            end: 'top 60%',
             scrub: 0.7
           }
         }
@@ -281,9 +281,9 @@
     const customWrapper = document.querySelector('.custom__wrapper');
     if (customWrapper) {
       gsap.fromTo(customWrapper,
-        { clipPath: 'inset(8% 4% 8% 4% round 6px)', scale: 0.97 },
+        { clipPath: 'inset(8% 4% 8% 4% round 18px)', scale: 0.97 },
         {
-          clipPath: 'inset(0% 0% 0% 0% round 6px)',
+          clipPath: 'inset(0% 0% 0% 0% round 18px)',
           scale: 1,
           ease: 'power2.out',
           scrollTrigger: {
@@ -349,7 +349,7 @@
           stagger: 0.1
         }, '-=0.45')
         .from('.hero .image-reveal', {
-          clipPath: 'inset(100% 0% 0% 0%)',
+          clipPath: 'inset(100% 0% 0% 0% round 18px)',
           duration: 1.05,
           stagger: 0.15,
           ease: 'power4.out'
@@ -637,7 +637,7 @@
       dom.cartItemsContainer.innerHTML = `
         <div class="cart-empty">
           <p>Twój koszyk jest obecnie pusty.</p>
-          <p style="font-size: 0.85rem; margin-top: 0.5rem;">Odkryj nasze autorskie wydruki na papierze bawełnianym oraz papeterię ślubną.</p>
+          <p style="font-size: 0.85rem; margin-top: 0.5rem;">Odkryj autorskie wydruki na papierze bawełnianym oraz papeterię ślubną z Pracowni Graficznej Asi.</p>
         </div>
       `;
       dom.cartFooter.style.display = 'none';
@@ -858,7 +858,7 @@
       }
 
       dom.quoteFeedback.classList.remove('is-error');
-      dom.quoteFeedback.textContent = `Dziękujemy, ${name}. Przygotujemy indywidualną wycenę i dobór papierów w ciągu 24 godzin.`;
+      dom.quoteFeedback.textContent = `Dziękujemy, ${name}. Asia przygotuje indywidualną wycenę i dobór papierów w ciągu 24 godzin.`;
       dom.quoteForm.reset();
     });
 
