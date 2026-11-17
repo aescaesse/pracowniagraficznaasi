@@ -14,10 +14,15 @@
   let cart = loadCart();
   let activeCategory = 'all';
   let lenisInstance = null;
+  let heroSplitInstance = null;
+  let sectionSplitInstances = [];
 
   const dom = {
     preloader: document.querySelector('.preloader'),
     preloaderLine: document.querySelector('.preloader__line'),
+    header: document.getElementById('header'),
+    scrollProgress: document.getElementById('scroll-progress'),
+    velocityStage: document.querySelector('.velocity-stage'),
     productsGrid: document.getElementById('products-grid'),
     filterButtons: document.querySelectorAll('.filter-btn'),
     navFilterLinks: document.querySelectorAll('[data-filter-link]'),
@@ -80,14 +85,47 @@
 
   function initSmoothScroll() {
     if (typeof Lenis === 'undefined') return;
+
     lenisInstance = new Lenis({
-      duration: 1.2,
+      duration: 1.25,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true
     });
 
-    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-      lenisInstance.on('scroll', ScrollTrigger.update);
+    const isDesktop = () => window.innerWidth >= 1024;
+    let currentSkew = 0;
+
+    lenisInstance.on('scroll', (e) => {
+      if (typeof ScrollTrigger !== 'undefined') {
+        ScrollTrigger.update();
+      }
+
+      if (dom.scrollProgress) {
+        dom.scrollProgress.style.transform = `scaleX(${e.progress || 0})`;
+      }
+
+      if (dom.header) {
+        if (e.scroll > 40) {
+          dom.header.classList.add('is-scrolled');
+        } else {
+          dom.header.classList.remove('is-scrolled');
+        }
+
+        if (e.direction === 1 && e.scroll > 260 && !dom.mobileNav?.classList.contains('is-open')) {
+          dom.header.classList.add('is-hidden');
+        } else if (e.direction === -1 || e.scroll <= 260) {
+          dom.header.classList.remove('is-hidden');
+        }
+      }
+
+      if (dom.velocityStage && isDesktop()) {
+        const targetSkew = Math.max(-1.6, Math.min(1.6, (e.velocity || 0) * 0.045));
+        currentSkew += (targetSkew - currentSkew) * 0.14;
+        dom.velocityStage.style.transform = Math.abs(currentSkew) > 0.01 ? `skewY(${currentSkew.toFixed(3)}deg)` : '';
+      }
+    });
+
+    if (typeof gsap !== 'undefined') {
       gsap.ticker.add((time) => {
         lenisInstance.raf(time * 1000);
       });
@@ -108,9 +146,143 @@
         if (targetEl) {
           e.preventDefault();
           closeMobileMenu();
-          lenisInstance.scrollTo(targetEl, { offset: -76 });
+          lenisInstance.scrollTo(targetEl, { offset: -78 });
         }
       });
+    });
+  }
+
+  function buildTextSplits() {
+    if (typeof SplitType === 'undefined') return;
+
+    if (heroSplitInstance) {
+      heroSplitInstance.revert();
+    }
+    sectionSplitInstances.forEach((inst) => inst.revert());
+    sectionSplitInstances = [];
+
+    const heroTitle = document.getElementById('hero-dissolve-title');
+    if (heroTitle) {
+      heroSplitInstance = new SplitType(heroTitle, { types: 'lines,words,chars' });
+    }
+
+    document.querySelectorAll('.dissolve-heading').forEach((heading) => {
+      const inst = new SplitType(heading, { types: 'words,chars' });
+      sectionSplitInstances.push(inst);
+    });
+  }
+
+  function setupDissolveTypography() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+    ScrollTrigger.getAll()
+      .filter((st) => st.vars && st.vars.id && st.vars.id.startsWith('dissolve-'))
+      .forEach((st) => st.kill());
+
+    const heroTitle = document.getElementById('hero-dissolve-title');
+    const displacementEl = document.getElementById('displacement-hero');
+    const turbulenceEl = document.getElementById('turbulence-hero');
+
+    if (heroTitle && heroSplitInstance && heroSplitInstance.chars) {
+      const isMobile = window.innerWidth < 768;
+      const spreadX = isMobile ? 65 : 160;
+      const spreadY = isMobile ? -90 : -180;
+
+      const heroDissolveTl = gsap.timeline({
+        scrollTrigger: {
+          id: 'dissolve-hero',
+          trigger: '.hero',
+          start: 'top top',
+          end: 'bottom 15%',
+          scrub: 0.75
+        }
+      });
+
+      heroDissolveTl.to(heroSplitInstance.chars, {
+        x: () => gsap.utils.random(-spreadX, spreadX),
+        y: () => gsap.utils.random(spreadY, -20),
+        rotation: () => gsap.utils.random(-42, 42),
+        scale: () => gsap.utils.random(0.55, 1.45),
+        filter: 'blur(9px)',
+        opacity: 0,
+        stagger: {
+          amount: 0.42,
+          from: 'random'
+        },
+        ease: 'power1.in'
+      }, 0);
+
+      if (displacementEl && turbulenceEl && !isMobile) {
+        const turbState = { scale: 0, freqX: 0.012, freqY: 0.045 };
+        heroDissolveTl.to(turbState, {
+          scale: 52,
+          freqX: 0.032,
+          freqY: 0.095,
+          ease: 'power2.in',
+          onUpdate: () => {
+            displacementEl.setAttribute('scale', turbState.scale.toFixed(1));
+            turbulenceEl.setAttribute('baseFrequency', `${turbState.freqX.toFixed(4)} ${turbState.freqY.toFixed(4)}`);
+          }
+        }, 0);
+      }
+    }
+
+    sectionSplitInstances.forEach((inst, idx) => {
+      if (!inst.chars || !inst.chars.length) return;
+      const parentHeading = inst.elements[0];
+
+      gsap.fromTo(inst.chars,
+        {
+          y: 44,
+          x: () => gsap.utils.random(-28, 28),
+          rotation: () => gsap.utils.random(-16, 16),
+          filter: 'blur(7px)',
+          opacity: 0
+        },
+        {
+          y: 0,
+          x: 0,
+          rotation: 0,
+          filter: 'blur(0px)',
+          opacity: 1,
+          stagger: { amount: 0.35, from: 'start' },
+          ease: 'power3.out',
+          scrollTrigger: {
+            id: `dissolve-sec-in-${idx}`,
+            trigger: parentHeading,
+            start: 'top 92%',
+            end: 'top 56%',
+            scrub: 0.65
+          }
+        }
+      );
+
+      gsap.fromTo(inst.chars,
+        {
+          y: 0,
+          x: 0,
+          rotation: 0,
+          filter: 'blur(0px)',
+          opacity: 1
+        },
+        {
+          y: () => gsap.utils.random(-55, -18),
+          x: () => gsap.utils.random(-45, 45),
+          rotation: () => gsap.utils.random(-22, 22),
+          filter: 'blur(6px)',
+          opacity: 0,
+          stagger: { amount: 0.3, from: 'random' },
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: {
+            id: `dissolve-sec-out-${idx}`,
+            trigger: parentHeading,
+            start: 'top 16%',
+            end: 'top -22%',
+            scrub: 0.75
+          }
+        }
+      );
     });
   }
 
@@ -122,11 +294,26 @@
       .forEach((st) => st.kill());
 
     const cards = gsap.utils.toArray('.product-card');
+    const isDesktop = window.innerWidth >= 1080;
+    const isTablet = window.innerWidth >= 640 && window.innerWidth < 1080;
+
     cards.forEach((card, index) => {
-      const col = index % 3;
-      const enterX = col === 0 ? -95 : col === 2 ? 95 : 0;
-      const enterY = col === 1 ? 85 : 35;
-      const enterRot = col === 0 ? -3.5 : col === 2 ? 3.5 : 0;
+      let enterX = 0;
+      let enterY = 45;
+      let enterRot = 0;
+
+      if (isDesktop) {
+        const col = index % 3;
+        enterX = col === 0 ? -95 : col === 2 ? 95 : 0;
+        enterY = col === 1 ? 85 : 35;
+        enterRot = col === 0 ? -3.5 : col === 2 ? 3.5 : 0;
+      } else if (isTablet) {
+        const col = index % 2;
+        enterX = col === 0 ? -65 : 65;
+        enterRot = col === 0 ? -2.5 : 2.5;
+      } else {
+        enterX = index % 2 === 0 ? -36 : 36;
+      }
 
       gsap.fromTo(card,
         {
@@ -151,10 +338,6 @@
         }
       );
 
-      const exitX = col === 0 ? -120 : col === 2 ? 120 : 0;
-      const exitY = col === 1 ? 75 : -45;
-      const exitRot = col === 0 ? -4 : col === 2 ? 4 : 0;
-
       gsap.fromTo(card,
         {
           x: 0,
@@ -163,9 +346,9 @@
           opacity: 1
         },
         {
-          x: exitX,
-          y: exitY,
-          rotation: exitRot,
+          x: enterX * 1.2,
+          y: isDesktop && index % 3 === 1 ? 70 : -40,
+          rotation: enterRot * 1.15,
           opacity: 0.15,
           ease: 'none',
           immediateRender: false,
@@ -184,39 +367,7 @@
   function setupScrollAnimations() {
     if (typeof ScrollTrigger === 'undefined') return;
 
-    const headerEl = document.getElementById('header');
-    const logoEl = document.querySelector('.logo');
-    const navEl = document.querySelector('.nav');
-    const actionsEl = document.querySelector('.header__actions');
-
-    if (headerEl && logoEl && actionsEl) {
-      const headerSplitTl = gsap.timeline({ paused: true });
-      headerSplitTl
-        .to(logoEl, { x: -70, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
-        .to(actionsEl, { x: 70, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
-        .to(navEl, { y: -24, opacity: 0, duration: 0.35, ease: 'power2.inOut' }, 0)
-        .to(headerEl, {
-          backgroundColor: 'rgba(234, 234, 234, 0)',
-          borderBottomColor: 'rgba(20, 20, 20, 0)',
-          backdropFilter: 'blur(0px)',
-          duration: 0.4,
-          ease: 'power2.out'
-        }, 0.05);
-
-      ScrollTrigger.create({
-        start: 'top -80',
-        end: 99999,
-        onUpdate: (self) => {
-          if (self.direction === 1 && self.scroll() > 140) {
-            headerSplitTl.play();
-            headerEl.style.pointerEvents = 'none';
-          } else if (self.direction === -1 || self.scroll() <= 140) {
-            headerSplitTl.reverse();
-            headerEl.style.pointerEvents = 'auto';
-          }
-        }
-      });
-    }
+    const isDesktop = window.innerWidth >= 960;
 
     const heroDivergeTl = gsap.timeline({
       scrollTrigger: {
@@ -229,85 +380,67 @@
 
     heroDivergeTl
       .to('.hero__top-meta', { y: -55, opacity: 0, ease: 'none' }, 0)
-      .to('.hero__line--left', { xPercent: -26, y: -35, rotation: -1.5, opacity: 0.1, ease: 'none' }, 0)
-      .to('.hero__line--right', { xPercent: 26, y: -20, rotation: 1.5, opacity: 0.1, ease: 'none' }, 0)
-      .to('.bento-card--left', { xPercent: -24, y: 55, rotation: -5, opacity: 0.25, ease: 'none' }, 0.05)
-      .to('.bento-card--center', { y: 110, scale: 0.93, opacity: 0.15, ease: 'none' }, 0.05)
-      .to('.bento-card--right', { xPercent: 24, y: 55, rotation: 5, opacity: 0.25, ease: 'none' }, 0.05);
+      .to('.bento-card--left', {
+        xPercent: isDesktop ? -24 : -10,
+        y: 55,
+        rotation: isDesktop ? -5 : -2,
+        opacity: 0.2,
+        ease: 'none'
+      }, 0.05)
+      .to('.bento-card--center', {
+        y: 110,
+        scale: 0.92,
+        opacity: 0.15,
+        ease: 'none'
+      }, 0.05)
+      .to('.bento-card--right', {
+        xPercent: isDesktop ? 24 : 10,
+        y: 55,
+        rotation: isDesktop ? 5 : 2,
+        opacity: 0.2,
+        ease: 'none'
+      }, 0.05);
 
     gsap.utils.toArray('.split-header').forEach((header) => {
-      const left = header.querySelector('.split-header__left');
       const right = header.querySelector('.split-header__right');
+      if (!right) return;
 
-      if (left) {
-        gsap.fromTo(left,
-          { x: -90, opacity: 0 },
-          {
-            x: 0,
-            opacity: 1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: header,
-              start: 'top 92%',
-              end: 'top 55%',
-              scrub: 0.7
-            }
+      gsap.fromTo(right,
+        { x: isDesktop ? 85 : 35, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: header,
+            start: 'top 92%',
+            end: 'top 56%',
+            scrub: 0.7
           }
-        );
+        }
+      );
 
-        gsap.fromTo(left,
-          { x: 0, opacity: 1 },
-          {
-            x: -110,
-            opacity: 0.15,
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: header,
-              start: 'top 20%',
-              end: 'top -25%',
-              scrub: 0.75
-            }
+      gsap.fromTo(right,
+        { x: 0, opacity: 1 },
+        {
+          x: isDesktop ? 105 : 40,
+          opacity: 0.15,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: header,
+            start: 'top 18%',
+            end: 'top -24%',
+            scrub: 0.75
           }
-        );
-      }
-
-      if (right) {
-        gsap.fromTo(right,
-          { x: 90, opacity: 0 },
-          {
-            x: 0,
-            opacity: 1,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: header,
-              start: 'top 92%',
-              end: 'top 55%',
-              scrub: 0.7
-            }
-          }
-        );
-
-        gsap.fromTo(right,
-          { x: 0, opacity: 1 },
-          {
-            x: 110,
-            opacity: 0.15,
-            ease: 'none',
-            immediateRender: false,
-            scrollTrigger: {
-              trigger: header,
-              start: 'top 20%',
-              end: 'top -25%',
-              scrub: 0.75
-            }
-          }
-        );
-      }
+        }
+      );
     });
 
     gsap.utils.toArray('.craft-card').forEach((card, index) => {
-      const dirX = index === 0 ? -110 : index === 1 ? -40 : index === 2 ? 40 : 110;
+      const dirX = isDesktop
+        ? (index === 0 ? -110 : index === 1 ? -40 : index === 2 ? 40 : 110)
+        : (index % 2 === 0 ? -45 : 45);
       const dirY = index % 2 === 0 ? 70 : -55;
       const rot = index < 2 ? -3 : 3;
 
@@ -361,7 +494,7 @@
     const customForm = document.querySelector('.custom-form');
     if (customInfo && customForm) {
       gsap.fromTo(customInfo,
-        { x: -110, rotation: -2, opacity: 0.2 },
+        { x: isDesktop ? -110 : -35, rotation: isDesktop ? -2 : 0, opacity: 0.2 },
         {
           x: 0,
           rotation: 0,
@@ -377,7 +510,7 @@
       );
 
       gsap.fromTo(customForm,
-        { x: 110, rotation: 2, opacity: 0.2 },
+        { x: isDesktop ? 110 : 35, rotation: isDesktop ? 2 : 0, opacity: 0.2 },
         {
           x: 0,
           rotation: 0,
@@ -394,7 +527,7 @@
     }
 
     gsap.utils.toArray('.parallax-img').forEach((img) => {
-      const speed = parseFloat(img.dataset.speed || '0.08');
+      const speed = parseFloat(img.dataset.speed || '0.09');
       gsap.to(img, {
         yPercent: speed * 100,
         scale: 1.08,
@@ -408,6 +541,7 @@
       });
     });
 
+    setupDissolveTypography();
     setupProductScrollDivergence();
   }
 
@@ -416,6 +550,8 @@
     if (typeof ScrollTrigger !== 'undefined') {
       gsap.registerPlugin(ScrollTrigger);
     }
+
+    buildTextSplits();
 
     const drawFrame = document.querySelector('.draw-frame');
     const drawLoop = document.querySelector('.draw-loop');
@@ -429,6 +565,8 @@
       gsap.set(drawLoop, { strokeDasharray: loopLen, strokeDashoffset: loopLen });
       gsap.set(drawBar, { strokeDasharray: barLen, strokeDashoffset: barLen });
     }
+
+    const heroChars = heroSplitInstance?.chars || [];
 
     const introTl = gsap.timeline({
       defaults: { ease: 'power3.out' },
@@ -455,12 +593,21 @@
             dom.preloader.style.display = 'none';
           }
         }, 0.95)
-        .from('.hero-reveal', {
-          y: 34,
+        .from(heroChars, {
+          y: 45,
           opacity: 0,
+          filter: 'blur(8px)',
+          rotation: () => gsap.utils.random(-14, 14),
           duration: 0.85,
-          stagger: 0.1
+          stagger: 0.022,
+          ease: 'power3.out'
         }, '-=0.45')
+        .from('.hero-reveal', {
+          y: 28,
+          opacity: 0,
+          duration: 0.8,
+          stagger: 0.1
+        }, '-=0.65')
         .from('.hero .image-reveal', {
           clipPath: 'inset(100% 0% 0% 0%)',
           duration: 1.05,
@@ -470,6 +617,18 @@
     } else {
       setupScrollAnimations();
     }
+
+    let resizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        buildTextSplits();
+        setupScrollAnimations();
+        if (typeof ScrollTrigger !== 'undefined') {
+          ScrollTrigger.refresh();
+        }
+      }, 280);
+    });
   }
 
   function initMagneticButtons() {
@@ -857,6 +1016,7 @@
       link.addEventListener('click', () => {
         const filterVal = link.dataset.filterLink;
         if (filterVal) setCategoryFilter(filterVal);
+        closeMobileMenu();
       });
     });
 
@@ -929,6 +1089,10 @@
       dom.mobileMenuBtn.setAttribute('aria-expanded', String(!expanded));
       dom.mobileNav.classList.toggle('is-open', !expanded);
       dom.mobileNav.setAttribute('aria-hidden', String(expanded));
+      if (lenisInstance) {
+        if (!expanded) lenisInstance.stop();
+        else lenisInstance.start();
+      }
     });
 
     dom.quoteForm?.addEventListener('submit', (e) => {

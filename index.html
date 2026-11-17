@@ -16,9 +16,9 @@
 
   <svg class="svg-filters" aria-hidden="true">
     <defs>
-      <filter id="liquid-dissolve-hero" x="-20%" y="-20%" width="140%" height="140%">
-        <feTurbulence id="turbulence-hero" type="fractalNoise" baseFrequency="0.012 0.045" numOctaves="2" seed="3" result="noise"/>
-        <feDisplacementMap id="displacement-hero" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+      <filter id="liquid-melt-filter" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+        <feTurbulence id="liquid-turbulence" type="fractalNoise" baseFrequency="0.008 0.025" numOctaves="3" seed="8" result="turbulence"/>
+        <feDisplacementMap id="liquid-displacement" in="SourceGraphic" in2="turbulence" scale="0" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
     </defs>
   </svg>
@@ -35,44 +35,25 @@
     </div>
   </div>
 
+  <!-- Minimalistyczny, lewitujący mikro-header bez zbędnych elementów -->
   <header class="header" id="header">
     <div class="container header__inner">
       <a href="#" class="logo" aria-label="Strona główna Pracownia Graficzna Asi">
-        <span class="logo__frame">
-          <svg class="logo__svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <rect x="10" y="10" width="100" height="100" stroke="currentColor" stroke-width="6.5"/>
-            <path d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
-            <line x1="34" y1="77" x2="54" y2="77" stroke="currentColor" stroke-width="6"/>
-          </svg>
-        </span>
-        <div class="logo__wordmark">
-          <span class="logo__text">PRACOWNIA GRAFICZNA</span>
-          <span class="logo__sub">Asi — Rzeszów</span>
-        </div>
+        <svg class="logo__svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="10" y="10" width="100" height="100" stroke="currentColor" stroke-width="6.5"/>
+          <path d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
+          <line x1="34" y1="77" x2="54" y2="77" stroke="currentColor" stroke-width="6"/>
+        </svg>
+        <span class="logo__text">PRACOWNIA ASI</span>
       </a>
 
-      <nav class="nav" aria-label="Nawigacja główna">
-        <ul class="nav__list">
-          <li><a href="#kolekcja" class="nav__link" data-filter-link="all"><span class="nav__num">01</span> Kolekcja</a></li>
-          <li><a href="#kolekcja" class="nav__link" data-filter-link="prints"><span class="nav__num">02</span> Wydruki</a></li>
-          <li><a href="#kolekcja" class="nav__link" data-filter-link="stationery"><span class="nav__num">03</span> Papeteria</a></li>
-          <li><a href="#pracownia" class="nav__link"><span class="nav__num">04</span> Papiery</a></li>
-          <li><a href="#wycena" class="nav__link"><span class="nav__num">05</span> Custom</a></li>
-        </ul>
-      </nav>
-
       <div class="header__actions">
-        <a href="#wycena" class="header__status-pill">
-          <span class="status-dot"></span>
-          <span>Terminy 2026</span>
-        </a>
-
         <button type="button" class="cart-trigger magnetic-btn" id="cart-open-btn" aria-label="Otwórz koszyk">
-          <span class="cart-trigger__label">Koszyk</span>
+          <span>KOSZYK</span>
           <span class="cart-trigger__count" id="cart-count">0</span>
         </button>
 
-        <button type="button" class="menu-toggle" id="mobile-menu-btn" aria-label="Otwórz menu" aria-expanded="false">
+        <button type="button" class="menu-toggle magnetic-btn" id="mobile-menu-btn" aria-label="Otwórz nawigację" aria-expanded="false">
           <span class="menu-toggle__label">MENU</span>
           <span class="menu-toggle__bars">
             <span></span>
@@ -84,9 +65,10 @@
     <div class="header__progress" id="scroll-progress"></div>
   </header>
 
+  <!-- Pełnoekranowe menu otwierane przyciskiem MENU -->
   <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
-    <div class="mobile-nav__inner">
-      <p class="eyebrow">NAWIGACJA PRACOWNI</p>
+    <div class="mobile-nav__inner container">
+      <p class="eyebrow">NAWIGACJA PRACOWNI — RZESZÓW</p>
       <ul class="mobile-nav__list">
         <li><a href="#kolekcja" class="mobile-nav__link" data-filter-link="all"><span>01</span> Kolekcja edycji</a></li>
         <li><a href="#kolekcja" class="mobile-nav__link" data-filter-link="prints"><span>02</span> Wydruki Giclée</a></li>
@@ -96,67 +78,47 @@
       </ul>
       <div class="mobile-nav__footer">
         <span>kontakt@pracowniagraficznaasi.pl</span>
-        <span>RZESZÓW / PL</span>
+        <span>GICLÉE • HOT-STAMPING • PLOTER</span>
       </div>
     </div>
   </div>
 
   <main id="main-content" class="velocity-stage">
+    <!-- MONUMENTALNY FRONT HERO Z EFEKTEM LIQUID MELT -->
     <section class="hero" id="hero">
-      <div class="container">
-        <div class="hero__top-meta hero-reveal">
-          <span class="frame-tag">STUDIO POLIGRAFICZNE — RZESZÓW</span>
-          <span class="frame-tag frame-tag--italic">Giclée • Hot-Stamping • Ploter</span>
+      <div class="hero__ambient-orb" id="hero-orb" aria-hidden="true"></div>
+
+      <div class="container hero__stage">
+        <div class="hero__kicker hero-reveal">
+          <span>STUDIO POLIGRAFICZNE — EDYCJA 2026</span>
+          <span class="hero__kicker-dot"></span>
+          <span>GICLÉE • ZŁOCENIE • PLOTER</span>
         </div>
 
-        <h1 class="hero__title" id="hero-dissolve-title">
-          <span class="hero__line hero__line--1">SZTUKA <span class="stroke-word">ZAMKNIĘTA</span></span>
-          <span class="hero__line hero__line--2">W <em class="serif-accent">strukturze</em> PAPIERU</span>
-        </h1>
+        <!-- Kontener objęty filtrem SVG liquid-melt-filter -->
+        <div class="hero__liquid-wrap" id="hero-liquid-wrap">
+          <h1 class="hero__mega-title" id="hero-dissolve-title">
+            <span class="hero__row hero__row--1">SZTUKA <span class="stroke-word">ZAMKNIĘTA</span></span>
+            <span class="hero__row hero__row--2"><em class="serif-accent">w strukturze</em> PAPIERU</span>
+            <span class="hero__row hero__row--3">I <span class="accent-word">DETALU</span></span>
+          </h1>
+        </div>
 
-        <div class="hero__bento">
-          <div class="bento-card bento-card--left image-reveal">
-            <img 
-              src="https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=1100&q=85" 
-              alt="Papeteria ślubna na papierze czerpanym z pieczęcią lakową" 
-              class="parallax-img"
-              data-speed="0.09"
-            >
-            <div class="bento-card__notch">
-              <span>01 / PAPETERIA ŚLUBNA &amp; ZŁOCENIE</span>
-            </div>
-          </div>
+        <div class="hero__bottom-bar hero-reveal">
+          <p class="hero__manifest">
+            Autorskie wydruki kolekcjonerskie na 100% bawełnie, papeteria tłoczona mosiężną matrycą oraz cięcie ploterowe z dokładnością do 0,1 mm.
+          </p>
 
-          <div class="bento-card bento-card--center hero-reveal">
-            <div class="bento-card__monogram">
-              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="10" y="10" width="100" height="100" stroke="currentColor" stroke-width="5"/>
-                <path d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
-                <line x1="34" y1="77" x2="54" y2="77" stroke="currentColor" stroke-width="4.5"/>
-              </svg>
-              <span>EDYCJA AUTORSKA 2026</span>
-            </div>
-            <p class="bento-card__lead">
-              Projektujemy i drukujemy autorskie plakaty kolekcjonerskie, tłoczoną papeterię okolicznościową oraz precyzyjne detale wycinane ploterem.
-            </p>
-            <div class="hero__cta-group">
-              <a href="#kolekcja" class="btn btn--primary magnetic-btn">Odkryj kolekcję</a>
-              <a href="#wycena" class="btn btn--ghost">Wycena custom</a>
-            </div>
-          </div>
-
-          <div class="bento-card bento-card--right image-reveal">
-            <img 
-              src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=85" 
-              alt="Minimalistyczny plakat artystyczny oprawiony w ramę" 
-              class="parallax-img"
-              data-speed="-0.09"
-            >
-            <div class="bento-card__notch">
-              <span>02 / WYDRUKI A4–B2</span>
-            </div>
+          <div class="hero__cta-row">
+            <a href="#kolekcja" class="btn btn--primary magnetic-btn">Eksploruj kolekcję</a>
+            <a href="#wycena" class="btn btn--ghost magnetic-btn">Projekt na wymiar</a>
           </div>
         </div>
+      </div>
+
+      <div class="hero__scroll-cue hero-reveal" aria-hidden="true">
+        <span>PRZEWIŃ, ABY ROZPŁYNĄĆ</span>
+        <div class="hero__scroll-line"></div>
       </div>
     </section>
 

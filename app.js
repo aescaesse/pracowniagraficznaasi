@@ -87,7 +87,7 @@
     if (typeof Lenis === 'undefined') return;
 
     lenisInstance = new Lenis({
-      duration: 1.25,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true
     });
@@ -105,21 +105,21 @@
       }
 
       if (dom.header) {
-        if (e.scroll > 40) {
+        if (e.scroll > 30) {
           dom.header.classList.add('is-scrolled');
         } else {
           dom.header.classList.remove('is-scrolled');
         }
 
-        if (e.direction === 1 && e.scroll > 260 && !dom.mobileNav?.classList.contains('is-open')) {
+        if (e.direction === 1 && e.scroll > 350 && !dom.mobileNav?.classList.contains('is-open')) {
           dom.header.classList.add('is-hidden');
-        } else if (e.direction === -1 || e.scroll <= 260) {
+        } else if (e.direction === -1 || e.scroll <= 350) {
           dom.header.classList.remove('is-hidden');
         }
       }
 
       if (dom.velocityStage && isDesktop()) {
-        const targetSkew = Math.max(-1.6, Math.min(1.6, (e.velocity || 0) * 0.045));
+        const targetSkew = Math.max(-1.4, Math.min(1.4, (e.velocity || 0) * 0.04));
         currentSkew += (targetSkew - currentSkew) * 0.14;
         dom.velocityStage.style.transform = Math.abs(currentSkew) > 0.01 ? `skewY(${currentSkew.toFixed(3)}deg)` : '';
       }
@@ -146,7 +146,7 @@
         if (targetEl) {
           e.preventDefault();
           closeMobileMenu();
-          lenisInstance.scrollTo(targetEl, { offset: -78 });
+          lenisInstance.scrollTo(targetEl, { offset: -76 });
         }
       });
     });
@@ -163,7 +163,7 @@
 
     const heroTitle = document.getElementById('hero-dissolve-title');
     if (heroTitle) {
-      heroSplitInstance = new SplitType(heroTitle, { types: 'lines,words,chars' });
+      heroSplitInstance = new SplitType(heroTitle, { types: 'words,chars' });
     }
 
     document.querySelectorAll('.dissolve-heading').forEach((heading) => {
@@ -172,71 +172,127 @@
     });
   }
 
-  function setupDissolveTypography() {
+  /* Pinned Liquid Melt Hero + Rozpływanie sekcji */
+  function setupLiquidTypography() {
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
     ScrollTrigger.getAll()
-      .filter((st) => st.vars && st.vars.id && st.vars.id.startsWith('dissolve-'))
+      .filter((st) => st.vars && st.vars.id && st.vars.id.startsWith('liquid-'))
       .forEach((st) => st.kill());
 
-    const heroTitle = document.getElementById('hero-dissolve-title');
-    const displacementEl = document.getElementById('displacement-hero');
-    const turbulenceEl = document.getElementById('turbulence-hero');
+    const heroSection = document.getElementById('hero');
+    const displacementEl = document.getElementById('liquid-displacement');
+    const turbulenceEl = document.getElementById('liquid-turbulence');
+    const heroOrb = document.getElementById('hero-orb');
 
-    if (heroTitle && heroSplitInstance && heroSplitInstance.chars) {
+    // Interaktywna reakcja falowania na ruch kursora w Hero
+    if (heroSection && displacementEl && turbulenceEl) {
+      let isHoveringHero = false;
+      heroSection.addEventListener('pointermove', (e) => {
+        if (window.scrollY > window.innerHeight * 0.35) return;
+        const rect = heroSection.getBoundingClientRect();
+        const nx = (e.clientX - rect.left) / rect.width - 0.5;
+        const ny = (e.clientY - rect.top) / rect.height - 0.5;
+
+        if (heroOrb) {
+          gsap.to(heroOrb, {
+            x: nx * 160,
+            y: ny * 120,
+            duration: 0.9,
+            ease: 'power2.out'
+          });
+        }
+
+        const speed = Math.min(28, (Math.abs(e.movementX) + Math.abs(e.movementY)) * 0.65);
+        if (speed > 2) {
+          isHoveringHero = true;
+          turbulenceEl.setAttribute('baseFrequency', `${(0.012 + Math.abs(nx) * 0.02).toFixed(4)} ${(0.03 + Math.abs(ny) * 0.04).toFixed(4)}`);
+          gsap.to(displacementEl, {
+            attr: { scale: speed },
+            duration: 0.25,
+            overwrite: 'auto',
+            onComplete: () => {
+              if (window.scrollY < 40 && isHoveringHero) {
+                gsap.to(displacementEl, { attr: { scale: 0 }, duration: 0.9, ease: 'power3.out' });
+              }
+            }
+          });
+        }
+      });
+    }
+
+    // Przypięta (PINNED) animacja Liquid Melt przy scrollowaniu Hero — 100% widoczna na ekranie!
+    if (heroSection && heroSplitInstance && heroSplitInstance.chars) {
       const isMobile = window.innerWidth < 768;
-      const spreadX = isMobile ? 65 : 160;
-      const spreadY = isMobile ? -90 : -180;
+      const liquidState = { scale: 0, freqX: 0.008, freqY: 0.025, seed: 8 };
 
-      const heroDissolveTl = gsap.timeline({
+      const heroLiquidTl = gsap.timeline({
         scrollTrigger: {
-          id: 'dissolve-hero',
-          trigger: '.hero',
+          id: 'liquid-hero-pin',
+          trigger: heroSection,
           start: 'top top',
-          end: 'bottom 15%',
-          scrub: 0.75
+          end: '+=125%',
+          pin: true,
+          scrub: 0.6,
+          anticipatePin: 1
         }
       });
 
-      heroDissolveTl.to(heroSplitInstance.chars, {
-        x: () => gsap.utils.random(-spreadX, spreadX),
-        y: () => gsap.utils.random(spreadY, -20),
-        rotation: () => gsap.utils.random(-42, 42),
-        scale: () => gsap.utils.random(0.55, 1.45),
-        filter: 'blur(9px)',
-        opacity: 0,
-        stagger: {
-          amount: 0.42,
-          from: 'random'
-        },
-        ease: 'power1.in'
-      }, 0);
+      // Przeciwbieżny ruch 3 gigantycznych wierszy napisu
+      heroLiquidTl
+        .to('.hero__row--1', { xPercent: isMobile ? -8 : -14, ease: 'none' }, 0)
+        .to('.hero__row--2', { xPercent: isMobile ? 10 : 18, ease: 'none' }, 0)
+        .to('.hero__row--3', { xPercent: isMobile ? -10 : -16, ease: 'none' }, 0)
+        .to('.hero__bottom-bar, .hero__kicker, .hero__scroll-cue', {
+          opacity: 0,
+          y: -25,
+          duration: 0.35,
+          ease: 'power1.in'
+        }, 0);
 
-      if (displacementEl && turbulenceEl && !isMobile) {
-        const turbState = { scale: 0, freqX: 0.012, freqY: 0.045 };
-        heroDissolveTl.to(turbState, {
-          scale: 52,
-          freqX: 0.032,
-          freqY: 0.095,
+      // Falowanie i topnienie filtra SVG (prawdziwy efekt cieczy)
+      if (displacementEl && turbulenceEl) {
+        heroLiquidTl.to(liquidState, {
+          scale: isMobile ? 55 : 115,
+          freqX: 0.028,
+          freqY: 0.085,
+          duration: 0.85,
           ease: 'power2.in',
           onUpdate: () => {
-            displacementEl.setAttribute('scale', turbState.scale.toFixed(1));
-            turbulenceEl.setAttribute('baseFrequency', `${turbState.freqX.toFixed(4)} ${turbState.freqY.toFixed(4)}`);
+            displacementEl.setAttribute('scale', liquidState.scale.toFixed(1));
+            turbulenceEl.setAttribute('baseFrequency', `${liquidState.freqX.toFixed(4)} ${liquidState.freqY.toFixed(4)}`);
           }
-        }, 0);
+        }, 0.1);
       }
+
+      // Rozpraszanie i parowanie pojedynczych liter po rozpuszczeniu
+      heroLiquidTl.to(heroSplitInstance.chars, {
+        y: () => gsap.utils.random(-140, 90),
+        x: () => gsap.utils.random(-110, 110),
+        rotation: () => gsap.utils.random(-35, 35),
+        scale: () => gsap.utils.random(0.6, 1.5),
+        filter: 'blur(12px)',
+        opacity: 0,
+        stagger: {
+          amount: 0.45,
+          from: 'random'
+        },
+        duration: 0.7,
+        ease: 'power2.in'
+      }, 0.3);
     }
 
+    // Rozpływanie się nagłówków kolejnych sekcji
     sectionSplitInstances.forEach((inst, idx) => {
       if (!inst.chars || !inst.chars.length) return;
       const parentHeading = inst.elements[0];
 
       gsap.fromTo(inst.chars,
         {
-          y: 44,
-          x: () => gsap.utils.random(-28, 28),
-          rotation: () => gsap.utils.random(-16, 16),
-          filter: 'blur(7px)',
+          y: 48,
+          x: () => gsap.utils.random(-32, 32),
+          rotation: () => gsap.utils.random(-18, 18),
+          filter: 'blur(8px)',
           opacity: 0
         },
         {
@@ -248,10 +304,10 @@
           stagger: { amount: 0.35, from: 'start' },
           ease: 'power3.out',
           scrollTrigger: {
-            id: `dissolve-sec-in-${idx}`,
+            id: `liquid-sec-in-${idx}`,
             trigger: parentHeading,
             start: 'top 92%',
-            end: 'top 56%',
+            end: 'top 54%',
             scrub: 0.65
           }
         }
@@ -266,18 +322,18 @@
           opacity: 1
         },
         {
-          y: () => gsap.utils.random(-55, -18),
-          x: () => gsap.utils.random(-45, 45),
-          rotation: () => gsap.utils.random(-22, 22),
-          filter: 'blur(6px)',
+          y: () => gsap.utils.random(-65, -20),
+          x: () => gsap.utils.random(-50, 50),
+          rotation: () => gsap.utils.random(-24, 24),
+          filter: 'blur(8px)',
           opacity: 0,
           stagger: { amount: 0.3, from: 'random' },
           ease: 'none',
           immediateRender: false,
           scrollTrigger: {
-            id: `dissolve-sec-out-${idx}`,
+            id: `liquid-sec-out-${idx}`,
             trigger: parentHeading,
-            start: 'top 16%',
+            start: 'top 15%',
             end: 'top -22%',
             scrub: 0.75
           }
@@ -368,38 +424,6 @@
     if (typeof ScrollTrigger === 'undefined') return;
 
     const isDesktop = window.innerWidth >= 960;
-
-    const heroDivergeTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: '.hero',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 0.75
-      }
-    });
-
-    heroDivergeTl
-      .to('.hero__top-meta', { y: -55, opacity: 0, ease: 'none' }, 0)
-      .to('.bento-card--left', {
-        xPercent: isDesktop ? -24 : -10,
-        y: 55,
-        rotation: isDesktop ? -5 : -2,
-        opacity: 0.2,
-        ease: 'none'
-      }, 0.05)
-      .to('.bento-card--center', {
-        y: 110,
-        scale: 0.92,
-        opacity: 0.15,
-        ease: 'none'
-      }, 0.05)
-      .to('.bento-card--right', {
-        xPercent: isDesktop ? 24 : 10,
-        y: 55,
-        rotation: isDesktop ? 5 : 2,
-        opacity: 0.2,
-        ease: 'none'
-      }, 0.05);
 
     gsap.utils.toArray('.split-header').forEach((header) => {
       const right = header.querySelector('.split-header__right');
@@ -526,22 +550,7 @@
       );
     }
 
-    gsap.utils.toArray('.parallax-img').forEach((img) => {
-      const speed = parseFloat(img.dataset.speed || '0.09');
-      gsap.to(img, {
-        yPercent: speed * 100,
-        scale: 1.08,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: img.parentElement,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true
-        }
-      });
-    });
-
-    setupDissolveTypography();
+    setupLiquidTypography();
     setupProductScrollDivergence();
   }
 
@@ -581,39 +590,33 @@
 
     if (dom.preloader && dom.preloaderLine) {
       introTl
-        .to('.draw-frame', { strokeDashoffset: 0, duration: 0.55, ease: 'power2.inOut' }, 0)
-        .to('.draw-loop', { strokeDashoffset: 0, duration: 0.65, ease: 'power2.out' }, 0.25)
-        .to('.draw-bar', { strokeDashoffset: 0, duration: 0.25, ease: 'power2.out' }, 0.65)
-        .to(dom.preloaderLine, { scaleX: 1, duration: 0.75, ease: 'power2.inOut' }, 0.15)
+        .to('.draw-frame', { strokeDashoffset: 0, duration: 0.5, ease: 'power2.inOut' }, 0)
+        .to('.draw-loop', { strokeDashoffset: 0, duration: 0.6, ease: 'power2.out' }, 0.2)
+        .to('.draw-bar', { strokeDashoffset: 0, duration: 0.2, ease: 'power2.out' }, 0.55)
+        .to(dom.preloaderLine, { scaleX: 1, duration: 0.7, ease: 'power2.inOut' }, 0.12)
         .to(dom.preloader, {
           yPercent: -100,
-          duration: 0.85,
+          duration: 0.8,
           ease: 'power4.inOut',
           onComplete: () => {
             dom.preloader.style.display = 'none';
           }
-        }, 0.95)
+        }, 0.85)
         .from(heroChars, {
-          y: 45,
+          y: 65,
           opacity: 0,
-          filter: 'blur(8px)',
-          rotation: () => gsap.utils.random(-14, 14),
-          duration: 0.85,
-          stagger: 0.022,
-          ease: 'power3.out'
-        }, '-=0.45')
-        .from('.hero-reveal', {
-          y: 28,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.1
-        }, '-=0.65')
-        .from('.hero .image-reveal', {
-          clipPath: 'inset(100% 0% 0% 0%)',
-          duration: 1.05,
-          stagger: 0.15,
+          filter: 'blur(10px)',
+          rotation: () => gsap.utils.random(-16, 16),
+          duration: 0.95,
+          stagger: 0.024,
           ease: 'power4.out'
-        }, '-=0.7');
+        }, '-=0.4')
+        .from('.hero-reveal', {
+          y: 26,
+          opacity: 0,
+          duration: 0.75,
+          stagger: 0.1
+        }, '-=0.6');
     } else {
       setupScrollAnimations();
     }

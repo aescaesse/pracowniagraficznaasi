@@ -14,6 +14,15 @@
 </head>
 <body>
 
+  <svg class="svg-filters" aria-hidden="true">
+    <defs>
+      <filter id="liquid-dissolve-hero" x="-20%" y="-20%" width="140%" height="140%">
+        <feTurbulence id="turbulence-hero" type="fractalNoise" baseFrequency="0.012 0.045" numOctaves="2" seed="3" result="noise"/>
+        <feDisplacementMap id="displacement-hero" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
   <div class="preloader" aria-hidden="true">
     <div class="preloader__inner">
       <svg class="preloader__svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -29,11 +38,13 @@
   <header class="header" id="header">
     <div class="container header__inner">
       <a href="#" class="logo" aria-label="Strona główna Pracownia Graficzna Asi">
-        <svg class="logo__svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <rect x="10" y="10" width="100" height="100" stroke="currentColor" stroke-width="6.5"/>
-          <path d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
-          <line x1="34" y1="77" x2="54" y2="77" stroke="currentColor" stroke-width="6"/>
-        </svg>
+        <span class="logo__frame">
+          <svg class="logo__svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="10" y="10" width="100" height="100" stroke="currentColor" stroke-width="6.5"/>
+            <path d="M12 108 C36 86, 68 38, 72 20 C75 11, 61 12, 56 32 C49 62, 56 96, 82 96 C98 96, 103 80, 93 72 C85 66, 76 74, 83 82" stroke="currentColor" stroke-width="6.5" stroke-linecap="round"/>
+            <line x1="34" y1="77" x2="54" y2="77" stroke="currentColor" stroke-width="6"/>
+          </svg>
+        </span>
         <div class="logo__wordmark">
           <span class="logo__text">PRACOWNIA GRAFICZNA</span>
           <span class="logo__sub">Asi — Rzeszów</span>
@@ -42,36 +53,55 @@
 
       <nav class="nav" aria-label="Nawigacja główna">
         <ul class="nav__list">
-          <li><a href="#kolekcja" class="nav__link" data-filter-link="all">Kolekcja</a></li>
-          <li><a href="#kolekcja" class="nav__link" data-filter-link="prints">Wydruki</a></li>
-          <li><a href="#kolekcja" class="nav__link" data-filter-link="stationery">Papeteria</a></li>
-          <li><a href="#pracownia" class="nav__link">Papiery</a></li>
-          <li><a href="#wycena" class="nav__link">Custom</a></li>
+          <li><a href="#kolekcja" class="nav__link" data-filter-link="all"><span class="nav__num">01</span> Kolekcja</a></li>
+          <li><a href="#kolekcja" class="nav__link" data-filter-link="prints"><span class="nav__num">02</span> Wydruki</a></li>
+          <li><a href="#kolekcja" class="nav__link" data-filter-link="stationery"><span class="nav__num">03</span> Papeteria</a></li>
+          <li><a href="#pracownia" class="nav__link"><span class="nav__num">04</span> Papiery</a></li>
+          <li><a href="#wycena" class="nav__link"><span class="nav__num">05</span> Custom</a></li>
         </ul>
       </nav>
 
       <div class="header__actions">
+        <a href="#wycena" class="header__status-pill">
+          <span class="status-dot"></span>
+          <span>Terminy 2026</span>
+        </a>
+
         <button type="button" class="cart-trigger magnetic-btn" id="cart-open-btn" aria-label="Otwórz koszyk">
           <span class="cart-trigger__label">Koszyk</span>
           <span class="cart-trigger__count" id="cart-count">0</span>
         </button>
-        <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Otwórz menu" aria-expanded="false">
-          <span></span>
-          <span></span>
+
+        <button type="button" class="menu-toggle" id="mobile-menu-btn" aria-label="Otwórz menu" aria-expanded="false">
+          <span class="menu-toggle__label">MENU</span>
+          <span class="menu-toggle__bars">
+            <span></span>
+            <span></span>
+          </span>
         </button>
       </div>
     </div>
+    <div class="header__progress" id="scroll-progress"></div>
   </header>
 
   <div class="mobile-nav" id="mobile-nav" aria-hidden="true">
-    <ul class="mobile-nav__list">
-      <li><a href="#kolekcja" class="mobile-nav__link">Kolekcja</a></li>
-      <li><a href="#pracownia" class="mobile-nav__link">Papiery i Rzemiosło</a></li>
-      <li><a href="#wycena" class="mobile-nav__link">Zamówienia indywidualne</a></li>
-    </ul>
+    <div class="mobile-nav__inner">
+      <p class="eyebrow">NAWIGACJA PRACOWNI</p>
+      <ul class="mobile-nav__list">
+        <li><a href="#kolekcja" class="mobile-nav__link" data-filter-link="all"><span>01</span> Kolekcja edycji</a></li>
+        <li><a href="#kolekcja" class="mobile-nav__link" data-filter-link="prints"><span>02</span> Wydruki Giclée</a></li>
+        <li><a href="#kolekcja" class="mobile-nav__link" data-filter-link="stationery"><span>03</span> Papeteria Ślubna</a></li>
+        <li><a href="#pracownia" class="mobile-nav__link"><span>04</span> Papiery i Rzemiosło</a></li>
+        <li><a href="#wycena" class="mobile-nav__link"><span>05</span> Zamówienia na wymiar</a></li>
+      </ul>
+      <div class="mobile-nav__footer">
+        <span>kontakt@pracowniagraficznaasi.pl</span>
+        <span>RZESZÓW / PL</span>
+      </div>
+    </div>
   </div>
 
-  <main id="main-content">
+  <main id="main-content" class="velocity-stage">
     <section class="hero" id="hero">
       <div class="container">
         <div class="hero__top-meta hero-reveal">
@@ -79,9 +109,9 @@
           <span class="frame-tag frame-tag--italic">Giclée • Hot-Stamping • Ploter</span>
         </div>
 
-        <h1 class="hero__title">
-          <span class="hero__line hero__line--left hero-reveal">SZTUKA ZAMKNIĘTA</span>
-          <span class="hero__line hero__line--right hero-reveal">W <em class="serif-accent">strukturze</em> PAPIERU</span>
+        <h1 class="hero__title" id="hero-dissolve-title">
+          <span class="hero__line hero__line--1">SZTUKA <span class="stroke-word">ZAMKNIĘTA</span></span>
+          <span class="hero__line hero__line--2">W <em class="serif-accent">strukturze</em> PAPIERU</span>
         </h1>
 
         <div class="hero__bento">
@@ -90,9 +120,11 @@
               src="https://images.unsplash.com/photo-1586075010923-2dd4570fb338?auto=format&fit=crop&w=1100&q=85" 
               alt="Papeteria ślubna na papierze czerpanym z pieczęcią lakową" 
               class="parallax-img"
-              data-speed="0.08"
+              data-speed="0.09"
             >
-            <span class="bento-card__label">01 / PAPETERIA ŚLUBNA &amp; ZŁOCENIE</span>
+            <div class="bento-card__notch">
+              <span>01 / PAPETERIA ŚLUBNA &amp; ZŁOCENIE</span>
+            </div>
           </div>
 
           <div class="bento-card bento-card--center hero-reveal">
@@ -118,9 +150,11 @@
               src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=800&q=85" 
               alt="Minimalistyczny plakat artystyczny oprawiony w ramę" 
               class="parallax-img"
-              data-speed="-0.08"
+              data-speed="-0.09"
             >
-            <span class="bento-card__label">02 / WYDRUKI A4–B2</span>
+            <div class="bento-card__notch">
+              <span>02 / WYDRUKI A4–B2</span>
+            </div>
           </div>
         </div>
       </div>
@@ -131,7 +165,7 @@
         <div class="section-header split-header">
           <div class="split-header__left">
             <span class="eyebrow">01 / KATALOG PRACOWNI</span>
-            <h2 class="section-title">WYBRANE <em class="serif-accent">edycje</em></h2>
+            <h2 class="section-title dissolve-heading">WYBRANE <em class="serif-accent">edycje</em></h2>
           </div>
           
           <div class="filter-bar split-header__right" role="tablist" aria-label="Filtruj produkty według kategorii">
@@ -152,7 +186,7 @@
         <div class="section-header split-header">
           <div class="split-header__left">
             <span class="eyebrow">02 / SPECYFIKACJA TECHNICZNA</span>
-            <h2 class="section-title">PAPIERY I <em class="serif-accent">rzemiosło</em></h2>
+            <h2 class="section-title dissolve-heading">PAPIERY I <em class="serif-accent">rzemiosło</em></h2>
           </div>
           <p class="craft__header-note split-header__right">
             Pracujemy wyłącznie na bezkwasowych podłożach z certyfikatem FSC oraz 100% papierach bawełnianych Hahnemühle i Gmund.
@@ -216,7 +250,7 @@
         <div class="custom__wrapper">
           <div class="custom__info">
             <span class="eyebrow">03 / ZAMÓWIENIA INDYWIDUALNE</span>
-            <h2 class="section-title">PROJEKT <em class="serif-accent">na wymiar</em></h2>
+            <h2 class="section-title dissolve-heading">PROJEKT <em class="serif-accent">na wymiar</em></h2>
             <p class="custom__desc">
               Planujesz uroczystość i szukasz spójnej oprawy papeteryjnej? A może potrzebujesz limitowanej serii etykiet lub plakatów dla swojej marki? Opisz krótko swoją wizję — Asia przygotuje wycenę oraz dobór papierów w ciągu 24 godzin.
             </p>
@@ -348,6 +382,7 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+  <script src="https://unpkg.com/split-type@0.3.4/umd/index.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
