@@ -81,7 +81,7 @@
   function initSmoothScroll() {
     if (typeof Lenis === 'undefined') return;
     lenisInstance = new Lenis({
-      duration: 1.15,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true
     });
@@ -108,53 +108,80 @@
         if (targetEl) {
           e.preventDefault();
           closeMobileMenu();
-          lenisInstance.scrollTo(targetEl, { offset: -74 });
+          lenisInstance.scrollTo(targetEl, { offset: -76 });
         }
       });
     });
   }
 
-  function splitTextIntoChars(element) {
-    if (!element) return [];
-    const chars = [];
+  function setupProductScrollDivergence() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-    const walk = (node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent;
-        const fragment = document.createDocumentFragment();
-        const parts = text.split(/(\s+)/);
+    ScrollTrigger.getAll()
+      .filter((st) => st.vars && st.vars.id && st.vars.id.startsWith('prod-card-'))
+      .forEach((st) => st.kill());
 
-        parts.forEach((part) => {
-          if (!part) return;
-          if (/^\s+$/.test(part)) {
-            fragment.appendChild(document.createTextNode(part));
-          } else {
-            const wordSpan = document.createElement('span');
-            wordSpan.className = 'split-word';
+    const cards = gsap.utils.toArray('.product-card');
+    cards.forEach((card, index) => {
+      const col = index % 3;
+      const enterX = col === 0 ? -95 : col === 2 ? 95 : 0;
+      const enterY = col === 1 ? 85 : 35;
+      const enterRot = col === 0 ? -3.5 : col === 2 ? 3.5 : 0;
 
-            Array.from(part).forEach((char) => {
-              const charSpan = document.createElement('span');
-              charSpan.className = 'split-char';
-              charSpan.textContent = char;
-              wordSpan.appendChild(charSpan);
-              chars.push(charSpan);
-            });
-
-            fragment.appendChild(wordSpan);
+      gsap.fromTo(card,
+        {
+          x: enterX,
+          y: enterY,
+          rotation: enterRot,
+          opacity: 0.25
+        },
+        {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          opacity: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            id: `prod-card-in-${index}`,
+            trigger: card,
+            start: 'top 95%',
+            end: 'top 58%',
+            scrub: 0.75
           }
-        });
+        }
+      );
 
-        node.parentNode.replaceChild(fragment, node);
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        Array.from(node.childNodes).forEach(walk);
-      }
-    };
+      const exitX = col === 0 ? -120 : col === 2 ? 120 : 0;
+      const exitY = col === 1 ? 75 : -45;
+      const exitRot = col === 0 ? -4 : col === 2 ? 4 : 0;
 
-    walk(element);
-    return chars;
+      gsap.fromTo(card,
+        {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          opacity: 1
+        },
+        {
+          x: exitX,
+          y: exitY,
+          rotation: exitRot,
+          opacity: 0.15,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: {
+            id: `prod-card-out-${index}`,
+            trigger: card,
+            start: 'bottom 35%',
+            end: 'bottom -20%',
+            scrub: 0.85
+          }
+        }
+      );
+    });
   }
 
-  function setupScrollAnimations(heroChars) {
+  function setupScrollAnimations() {
     if (typeof ScrollTrigger === 'undefined') return;
 
     const headerEl = document.getElementById('header');
@@ -165,9 +192,9 @@
     if (headerEl && logoEl && actionsEl) {
       const headerSplitTl = gsap.timeline({ paused: true });
       headerSplitTl
-        .to(logoEl, { x: -48, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
-        .to(actionsEl, { x: 48, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
-        .to(navEl, { y: -18, opacity: 0, duration: 0.35, ease: 'power2.inOut' }, 0)
+        .to(logoEl, { x: -70, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
+        .to(actionsEl, { x: 70, opacity: 0, duration: 0.45, ease: 'power3.inOut' }, 0)
+        .to(navEl, { y: -24, opacity: 0, duration: 0.35, ease: 'power2.inOut' }, 0)
         .to(headerEl, {
           backgroundColor: 'rgba(234, 234, 234, 0)',
           borderBottomColor: 'rgba(20, 20, 20, 0)',
@@ -191,115 +218,186 @@
       });
     }
 
-    if (heroChars.length > 0) {
-      gsap.fromTo(heroChars,
-        {
-          x: 0,
-          y: 0,
-          rotation: 0,
-          scale: 1,
-          opacity: 1
-        },
-        {
-          x: () => gsap.utils.random(-90, 90),
-          y: () => gsap.utils.random(-110, -25),
-          rotation: () => gsap.utils.random(-28, 28),
-          scale: () => gsap.utils.random(0.75, 1.15),
-          opacity: 0,
-          stagger: {
-            amount: 0.35,
-            from: 'random'
-          },
-          ease: 'none',
-          immediateRender: false,
-          scrollTrigger: {
-            trigger: '.hero',
-            start: 'top top',
-            end: 'bottom 25%',
-            scrub: 0.8
-          }
-        }
-      );
-    }
-
-    gsap.fromTo('.bento-card--statement',
-      {
-        y: 0,
-        opacity: 1
-      },
-      {
-        y: -25,
-        opacity: 0.15,
-        ease: 'none',
-        immediateRender: false,
-        scrollTrigger: {
-          trigger: '.hero',
-          start: '30% top',
-          end: 'bottom top',
-          scrub: 0.6
-        }
+    const heroDivergeTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: 0.75
       }
-    );
+    });
 
-    gsap.utils.toArray('.reveal-up').forEach((el) => {
-      gsap.from(el, {
-        y: 36,
-        opacity: 0,
-        duration: 0.85,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 86%',
-          once: true
-        }
-      });
+    heroDivergeTl
+      .to('.hero__top-meta', { y: -55, opacity: 0, ease: 'none' }, 0)
+      .to('.hero__line--left', { xPercent: -26, y: -35, rotation: -1.5, opacity: 0.1, ease: 'none' }, 0)
+      .to('.hero__line--right', { xPercent: 26, y: -20, rotation: 1.5, opacity: 0.1, ease: 'none' }, 0)
+      .to('.bento-card--left', { xPercent: -24, y: 55, rotation: -5, opacity: 0.25, ease: 'none' }, 0.05)
+      .to('.bento-card--center', { y: 110, scale: 0.93, opacity: 0.15, ease: 'none' }, 0.05)
+      .to('.bento-card--right', { xPercent: 24, y: 55, rotation: 5, opacity: 0.25, ease: 'none' }, 0.05);
+
+    gsap.utils.toArray('.split-header').forEach((header) => {
+      const left = header.querySelector('.split-header__left');
+      const right = header.querySelector('.split-header__right');
+
+      if (left) {
+        gsap.fromTo(left,
+          { x: -90, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: header,
+              start: 'top 92%',
+              end: 'top 55%',
+              scrub: 0.7
+            }
+          }
+        );
+
+        gsap.fromTo(left,
+          { x: 0, opacity: 1 },
+          {
+            x: -110,
+            opacity: 0.15,
+            ease: 'none',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: header,
+              start: 'top 20%',
+              end: 'top -25%',
+              scrub: 0.75
+            }
+          }
+        );
+      }
+
+      if (right) {
+        gsap.fromTo(right,
+          { x: 90, opacity: 0 },
+          {
+            x: 0,
+            opacity: 1,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: header,
+              start: 'top 92%',
+              end: 'top 55%',
+              scrub: 0.7
+            }
+          }
+        );
+
+        gsap.fromTo(right,
+          { x: 0, opacity: 1 },
+          {
+            x: 110,
+            opacity: 0.15,
+            ease: 'none',
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: header,
+              start: 'top 20%',
+              end: 'top -25%',
+              scrub: 0.75
+            }
+          }
+        );
+      }
     });
 
     gsap.utils.toArray('.craft-card').forEach((card, index) => {
-      const isEven = index % 2 === 1;
+      const dirX = index === 0 ? -110 : index === 1 ? -40 : index === 2 ? 40 : 110;
+      const dirY = index % 2 === 0 ? 70 : -55;
+      const rot = index < 2 ? -3 : 3;
+
       gsap.fromTo(card,
         {
-          y: isEven ? 40 : 20,
-          rotation: isEven ? 1.5 : -1.5,
-          opacity: 0.45
+          x: dirX,
+          y: dirY,
+          rotation: rot,
+          opacity: 0.2
         },
         {
+          x: 0,
           y: 0,
           rotation: 0,
           opacity: 1,
           ease: 'power2.out',
           scrollTrigger: {
-            trigger: card,
+            trigger: '.craft__bento',
             start: 'top 92%',
-            end: 'top 60%',
-            scrub: 0.7
+            end: 'top 42%',
+            scrub: 0.75
+          }
+        }
+      );
+
+      gsap.fromTo(card,
+        {
+          x: 0,
+          y: 0,
+          rotation: 0,
+          opacity: 1
+        },
+        {
+          x: dirX * 1.15,
+          y: index % 2 === 0 ? -65 : 65,
+          rotation: -rot,
+          opacity: 0.15,
+          ease: 'none',
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: '.craft__bento',
+            start: 'bottom 45%',
+            end: 'bottom -15%',
+            scrub: 0.85
           }
         }
       );
     });
 
-    const customWrapper = document.querySelector('.custom__wrapper');
-    if (customWrapper) {
-      gsap.fromTo(customWrapper,
-        { clipPath: 'inset(8% 4% 8% 4% round 18px)', scale: 0.97 },
+    const customInfo = document.querySelector('.custom__info');
+    const customForm = document.querySelector('.custom-form');
+    if (customInfo && customForm) {
+      gsap.fromTo(customInfo,
+        { x: -110, rotation: -2, opacity: 0.2 },
         {
-          clipPath: 'inset(0% 0% 0% 0% round 18px)',
-          scale: 1,
+          x: 0,
+          rotation: 0,
+          opacity: 1,
           ease: 'power2.out',
           scrollTrigger: {
-            trigger: customWrapper,
-            start: 'top 88%',
+            trigger: '.custom__wrapper',
+            start: 'top 92%',
             end: 'top 45%',
-            scrub: 0.6
+            scrub: 0.75
+          }
+        }
+      );
+
+      gsap.fromTo(customForm,
+        { x: 110, rotation: 2, opacity: 0.2 },
+        {
+          x: 0,
+          rotation: 0,
+          opacity: 1,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: '.custom__wrapper',
+            start: 'top 92%',
+            end: 'top 45%',
+            scrub: 0.75
           }
         }
       );
     }
 
     gsap.utils.toArray('.parallax-img').forEach((img) => {
-      const speed = parseFloat(img.dataset.speed || '0.06');
+      const speed = parseFloat(img.dataset.speed || '0.08');
       gsap.to(img, {
         yPercent: speed * 100,
+        scale: 1.08,
         ease: 'none',
         scrollTrigger: {
           trigger: img.parentElement,
@@ -309,6 +407,8 @@
         }
       });
     });
+
+    setupProductScrollDivergence();
   }
 
   function initAnimations() {
@@ -317,14 +417,24 @@
       gsap.registerPlugin(ScrollTrigger);
     }
 
-    const heroTitle = document.querySelector('.hero__title');
-    const heroChars = splitTextIntoChars(heroTitle);
+    const drawFrame = document.querySelector('.draw-frame');
+    const drawLoop = document.querySelector('.draw-loop');
+    const drawBar = document.querySelector('.draw-bar');
+
+    if (drawFrame && drawLoop && drawBar) {
+      const frameLen = 400;
+      const loopLen = 280;
+      const barLen = 24;
+      gsap.set(drawFrame, { strokeDasharray: frameLen, strokeDashoffset: frameLen });
+      gsap.set(drawLoop, { strokeDasharray: loopLen, strokeDashoffset: loopLen });
+      gsap.set(drawBar, { strokeDasharray: barLen, strokeDashoffset: barLen });
+    }
 
     const introTl = gsap.timeline({
       defaults: { ease: 'power3.out' },
       onComplete: () => {
         gsap.set('.hero-reveal', { clearProps: 'transform,opacity' });
-        setupScrollAnimations(heroChars);
+        setupScrollAnimations();
         if (typeof ScrollTrigger !== 'undefined') {
           ScrollTrigger.refresh();
         }
@@ -333,7 +443,10 @@
 
     if (dom.preloader && dom.preloaderLine) {
       introTl
-        .to(dom.preloaderLine, { scaleX: 1, duration: 0.75, ease: 'power2.inOut' })
+        .to('.draw-frame', { strokeDashoffset: 0, duration: 0.55, ease: 'power2.inOut' }, 0)
+        .to('.draw-loop', { strokeDashoffset: 0, duration: 0.65, ease: 'power2.out' }, 0.25)
+        .to('.draw-bar', { strokeDashoffset: 0, duration: 0.25, ease: 'power2.out' }, 0.65)
+        .to(dom.preloaderLine, { scaleX: 1, duration: 0.75, ease: 'power2.inOut' }, 0.15)
         .to(dom.preloader, {
           yPercent: -100,
           duration: 0.85,
@@ -341,21 +454,21 @@
           onComplete: () => {
             dom.preloader.style.display = 'none';
           }
-        })
+        }, 0.95)
         .from('.hero-reveal', {
-          y: 28,
+          y: 34,
           opacity: 0,
           duration: 0.85,
           stagger: 0.1
         }, '-=0.45')
         .from('.hero .image-reveal', {
-          clipPath: 'inset(100% 0% 0% 0% round 18px)',
+          clipPath: 'inset(100% 0% 0% 0%)',
           duration: 1.05,
           stagger: 0.15,
           ease: 'power4.out'
         }, '-=0.7');
     } else {
-      setupScrollAnimations(heroChars);
+      setupScrollAnimations();
     }
   }
 
@@ -373,23 +486,6 @@
       btn.addEventListener('mouseleave', () => {
         btn.style.transform = 'translate3d(0, 0, 0)';
       });
-    });
-  }
-
-  function attachCardTilt(card) {
-    if (window.matchMedia('(hover: none)').matches) return;
-
-    card.addEventListener('mousemove', (e) => {
-      const rect = card.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width - 0.5;
-      const y = (e.clientY - rect.top) / rect.height - 0.5;
-      const rotateX = (-y * 5).toFixed(2);
-      const rotateY = (x * 5).toFixed(2);
-      card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-3px)`;
-    });
-
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) translateY(0px)';
     });
   }
 
@@ -453,18 +549,9 @@
       `;
     }).join('');
 
-    const cards = dom.productsGrid.querySelectorAll('.product-card');
-    cards.forEach((card) => attachCardTilt(card));
-
-    if (typeof gsap !== 'undefined') {
-      gsap.from(cards, {
-        y: 22,
-        opacity: 0,
-        duration: 0.55,
-        stagger: 0.06,
-        ease: 'power3.out',
-        clearProps: 'opacity'
-      });
+    setupProductScrollDivergence();
+    if (typeof ScrollTrigger !== 'undefined') {
+      ScrollTrigger.refresh();
     }
   }
 
